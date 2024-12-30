@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,464 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum PaiementStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum OperationStatus {
+  PENDING
+  CLOSED
+  REJECTED
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+}
+
+model User {
+  id       String  @id @unique @default(uuid())
+  name     String  @unique
+  mail     String? @unique
+  mobile   String  @unique
+  password String
+
+  isRoot            Boolean @default(false)
+  isActive          Boolean
+  mustRenewPassword Boolean @default(true)
+
+  roleId String
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  roles Role @relation("user-role", references: [id], fields: [roleId])
+
+  userPrivileges UserPrivilege[] @relation("User-Privilege")
+  agent          Agent?          @relation("agent-account")
+
+  organizationsCreated  Organization[]  @relation("OrganizationCreatedBy")
+  organizationsUpdated  Organization[]  @relation("OrganizationupdatedBy")
+  actionsCreated        Action[]        @relation("Action-CreatedBy")
+  actionsUpdated        Action[]        @relation("Action-updatedBy")
+  rolesCreated          Role[]          @relation("Role-CreatedBy")
+  rolesUpdated          Role[]          @relation("Role-updatedBy")
+  roleActionsCreated    RoleAction[]    @relation("RoleAction-createdBy")
+  roleActionsUpdated    RoleAction[]    @relation("RoleAction-updatedBy")
+  userPrivilegesCreated UserPrivilege[] @relation("UserPrivilege-createdBy")
+  userPrivilegesUpdated UserPrivilege[] @relation("UserPrivilege-updatedBy")
+  menusCreated          Menu[]          @relation("Menu-createdBy")
+  menusUpdated          Menu[]          @relation("Menu-updatedBy")
+  menuActionsCreated    MenuAction[]    @relation("MenuAction-createdBy")
+  menuActionsUpdated    MenuAction[]    @relation("MenuAction-updatedBy")
+  entitiesCreated       Entity[]        @relation("Entity-createdBy")
+  entitiesUpdated       Entity[]        @relation("Entity-updatedBy")
+  agentCreated          Agent[]         @relation("Agent-createdBy")
+  agentUpdated          Agent[]         @relation("Agent-updatedBy")
+  currenciesCreated     Currency[]      @relation("Currency-createdBy")
+  currenciesUpdated     Currency[]      @relation("Currency-updatedBy")
+  walletCreated         Wallet[]        @relation("Wallet-createdBy")
+  walletUpdated         Wallet[]        @relation("Wallet-updatedBy")
+  recipesCreated        Recipe[]        @relation("Recipe-createdBy")
+  recipesUpdated        Recipe[]        @relation("Recipe-updatedBy")
+  taxPayersTypesCreated TaxPayerType[]  @relation("TaxPayerType-createdBy")
+  taxPayersTypesUpdated TaxPayerType[]  @relation("TaxPayerType-updatedBy")
+  taxPayersCreated      TaxPayer[]      @relation("TaxPayer-createdBy")
+  taxPayersUpdated      TaxPayer[]      @relation("TaxPayer-updatedBy")
+  possessionsCreated    Possession[]    @relation("Possession-createdBy")
+  possessionsUpdated    Possession[]    @relation("Possession-updatedBy")
+  operationsCreated     Operation[]     @relation("Operation-createdBy")
+  operationsUpdated     Operation[]     @relation("Operation-updatedBy")
+  transactionsCreated   Transaction[]   @relation("Operation-createdBy")
+  transactionsUpdated   Transaction[]   @relation("Operation-updatedBy")
+}
+
+model Organization {
+  id    String @id @unique @default(uuid())
+  name  String @unique
+  photo String
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy  User?       @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
+  updatedBy  User?       @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
+  operations Operation[]
+}
+
+model Action {
+  id     String @id @unique @default(uuid())
+  name   String @unique
+  path   String
+  method String
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy      User?           @relation("Action-CreatedBy", fields: [createdByUserId], references: [id])
+  updatedBy      User?           @relation("Action-updatedBy", fields: [updatedByUserId], references: [id])
+  roleActions    RoleAction[]
+  userPrivileges UserPrivilege[]
+  menuActions    MenuAction[]
+}
+
+model Role {
+  id   String @id @unique @default(uuid())
+  name String @unique
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("Role-CreatedBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Role-updatedBy", fields: [updatedByUserId], references: [id])
+
+  users       User[]       @relation("user-role")
+  roleActions RoleAction[]
+}
+
+model RoleAction {
+  id       String @id @unique @default(uuid())
+  roleId   String
+  actionId String
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("RoleAction-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("RoleAction-updatedBy", fields: [updatedByUserId], references: [id])
+
+  role   Role   @relation(fields: [roleId], references: [id])
+  action Action @relation(fields: [actionId], references: [id])
+}
+
+model UserPrivilege {
+  id       String @id @unique @default(uuid())
+  userId   String
+  actionId String
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("UserPrivilege-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("UserPrivilege-updatedBy", fields: [updatedByUserId], references: [id])
+
+  user   User   @relation("User-Privilege", fields: [userId], references: [id])
+  action Action @relation(fields: [actionId], references: [id])
+}
+
+model Menu {
+  id        String  @id @unique @default(uuid())
+  name      String
+  isDefault Boolean @default(false)
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy   User?        @relation("Menu-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy   User?        @relation("Menu-updatedBy", fields: [updatedByUserId], references: [id])
+  menuActions MenuAction[]
+}
+
+model MenuAction {
+  id       String @id @unique @default(uuid())
+  menuId   String
+  actionId String
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("MenuAction-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("MenuAction-updatedBy", fields: [updatedByUserId], references: [id])
+
+  menu   Menu   @relation(fields: [menuId], references: [id])
+  action Action @relation(fields: [actionId], references: [id])
+}
+
+enum NamedEntity {
+  PROVINCE
+  VILLE
+  COMMUNE
+  QUARTIER
+}
+
+model Entity {
+  id           String  @id @unique @default(uuid())
+  name         String  @unique()
+  description  String
+  abbreviation String?
+  parentId     String
+
+  isActive Boolean? @default(true)
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("Entity-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Entity-updatedBy", fields: [updatedByUserId], references: [id])
+
+  parent    Entity   @relation("entity-parent", references: [id], fields: [parentId])
+  childrens Entity[] @relation("entity-parent")
+}
+
+model Agent {
+  id       String @id @unique @default(uuid())
+  fullName String @unique
+  mobile   String
+  address  String
+  userId   String @unique
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("Agent-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Agent-updatedBy", fields: [updatedByUserId], references: [id])
+
+  user                   User        @relation("agent-account", fields: [userId], references: [id])
+  wallets                Wallet[]
+  operationInitializated Operation[] @relation("operation-initByAgent")
+  operationClosed        Operation[] @relation("operation-closedByAgent")
+}
+
+model Currency {
+  id           String @id @unique @default(uuid())
+  name         String
+  symbol       String
+  formatKey    String
+  exchangeRate Int
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("Currency-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Currency-updatedBy", fields: [updatedByUserId], references: [id])
+
+  wallets Wallet[]
+}
+
+model Wallet {
+  id         String @id @unique @default(uuid())
+  solde      Float
+  agentId    String
+  currencyId String
+
+  canBeNegative Boolean
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("Wallet-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Wallet-updatedBy", fields: [updatedByUserId], references: [id])
+
+  agent        Agent         @relation(fields: [agentId], references: [id])
+  currency     Currency      @relation(fields: [currencyId], references: [id])
+  transactions Transaction[]
+}
+
+enum RecipeType {
+  TAX
+  IMPOT
+  REDEVANCE
+}
+
+model Recipe {
+  id             String     @id @unique @default(uuid())
+  name           String
+  pricing        Int
+  parentId       String
+  entityId       String?
+  currencyId     String?
+  description    String
+  typeRecipeId   RecipeType
+  generatingFact String?
+
+  activitySectorId String?
+  isActive         Boolean @default(true)
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("Recipe-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Recipe-updatedBy", fields: [updatedByUserId], references: [id])
+
+  parent    Recipe      @relation("recipe-inner-relation", fields: [parentId], references: [id])
+  childrens Recipe[]    @relation("recipe-inner-relation")
+  operation Operation[]
+}
+
+model TaxPayerType {
+  id       String  @id @unique @default(uuid())
+  name     String
+  isActive Boolean @default(false)
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("TaxPayerType-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("TaxPayerType-updatedBy", fields: [updatedByUserId], references: [id])
+
+  TaxPayer TaxPayer[]
+}
+
+model TaxPayer {
+  id       String  @id @unique @default(uuid())
+  fullName String
+  mobile   String
+  uniqueId String  @unique
+  typeId   String?
+
+  type TaxPayerType? @relation(fields: [typeId], references: [id])
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("TaxPayer-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("TaxPayer-updatedBy", fields: [updatedByUserId], references: [id])
+
+  possessions Possession[]
+}
+
+enum PossessionType {
+  MOTO
+}
+
+model Possession {
+  id           String         @id @unique @default(uuid())
+  uniqueNumber String         @unique
+  type         PossessionType
+  taxPayerId   String
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("Possession-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Possession-updatedBy", fields: [updatedByUserId], references: [id])
+
+  taxPayer   TaxPayer    @relation(fields: [taxPayerId], references: [id])
+  operations Operation[]
+}
+
+model Operation {
+  id              String @id @unique @default(uuid())
+  recipeId        String
+  possessionId    String
+  initByAgentId   String
+  organizationId  String
+  closedByAgentId String
+
+  status         OperationStatus
+  paiementStatus PaiementStatus
+
+  totalAmount Float
+  paiedAmount Float
+
+  isClosed Boolean
+
+  meta            Json      @default("{}")
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  isDeleted       Boolean?  @default(false)
+  updatedByUserId String?
+  createdByUserId String?
+
+  createdBy User? @relation("Operation-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Operation-updatedBy", fields: [updatedByUserId], references: [id])
+
+  recipe        Recipe        @relation(fields: [recipeId], references: [id])
+  possession    Possession    @relation(fields: [possessionId], references: [id])
+  initByAgent   Agent         @relation("operation-initByAgent", fields: [initByAgentId], references: [id])
+  organization  Organization  @relation(fields: [organizationId], references: [id])
+  closedByAgent Agent         @relation("operation-closedByAgent", fields: [closedByAgentId], references: [id])
+  transactions  Transaction[]
+}
+
+model Transaction {
+  id          String @id @unique @default(uuid())
+  amout       Float
+  walletId    String
+  operationId String
+
+  paiemendStatus  PaiementStatus
+  operationStatus OperationStatus
+  transactionType TransactionType
+
+  meta            Json      @default("{}")
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  isDeleted       Boolean?  @default(false)
+  updatedByUserId String?
+  createdByUserId String?
+
+  createdBy User? @relation("Operation-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("Operation-updatedBy", fields: [updatedByUserId], references: [id])
+
+  operation Operation @relation(fields: [operationId], references: [id])
+  wallet    Wallet    @relation(fields: [walletId], references: [id])
 }
