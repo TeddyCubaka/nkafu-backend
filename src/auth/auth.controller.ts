@@ -1,10 +1,11 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
+import { Body, Controller, Post, Request, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   SignupBodyInterface,
   SignupPayload,
 } from './interfaces/signup-payload';
 import { Utils } from 'src/utils/utils';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -20,8 +21,16 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signup(@Body() body: SignupBodyInterface) {
+  async signup(@Body() body: SignupBodyInterface, @Res() res: Response) {
     const validator = this.utils.validateRequestBody(body, SignupPayload);
-    return validator;
+    if (validator.isFailed)
+      res.status(400).json({
+        code: 400,
+        message: "une erreur 'est produite",
+        error: validator,
+      });
+
+    const response = await this.authService.signup(body);
+    return res.status(response.code).json(response);
   }
 }
