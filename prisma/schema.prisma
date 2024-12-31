@@ -31,9 +31,10 @@ model User {
   mobile   String  @unique
   password String
 
-  isRoot            Boolean @default(false)
-  isActive          Boolean
-  mustRenewPassword Boolean @default(true)
+  isRoot              Boolean @default(false)
+  isActive            Boolean
+  mustRenewPassword   Boolean @default(true)
+  allowedDeviceNumber Int     @default(1)
 
   roleId String
 
@@ -83,6 +84,18 @@ model User {
   operationsUpdated     Operation[]     @relation("Operation-updatedBy")
   transactionsCreated   Transaction[]   @relation("Operation-createdBy")
   transactionsUpdated   Transaction[]   @relation("Operation-updatedBy")
+  UserDevice            UserDevice[]
+}
+
+model UserDevice {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  deviceType String
+  os         String
+  browser    String
+  ip         String
+  createdAt  DateTime @default(now())
 }
 
 model Organization {
