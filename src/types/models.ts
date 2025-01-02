@@ -17,4 +17,5 @@ export type InputType = {
   options?: Array<{ label: string; value: string | number }>;
   endpoint?: string;
   childrens?: InputType[];
+  required?: boolean;
 };

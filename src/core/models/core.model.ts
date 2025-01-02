@@ -31,7 +31,7 @@ export class Currency extends BaseModel<'currency'> {
   }[] = (currency) => {
     return currency.map((line) => ({
       value: line.id,
-      verbose: line.value,
+      verbose: line.name,
     }));
   };
 }

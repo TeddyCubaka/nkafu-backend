@@ -60,7 +60,7 @@ export class QueriesUtils {
 
   public toPrismaFilterMap(queries: Record<string, any>): PrismaFilter {
     const prismaFilters: PrismaFilter = {
-      where: {},
+      where: undefined,
       select: undefined,
       include: undefined,
       take: undefined,
