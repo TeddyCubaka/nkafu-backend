@@ -34,11 +34,17 @@ export class CoreController {
         message: `${data.length} lignes trouvées`,
         data,
       }))
-      .catch((error: any) => ({
-        code: 400,
-        message: "une erreur s'est produite",
-        error: formatPrismaError(error),
-      }));
+      .catch((error: any) => {
+        const formatedError = formatPrismaError(error);
+        return {
+          code: 400,
+          message: "une erreur s'est produite",
+          error: {
+            details: formatedError.details,
+            meta: formatedError.meta,
+          },
+        };
+      });
 
     return res.status(200).json({
       ...data,

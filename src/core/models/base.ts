@@ -24,32 +24,36 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     this.model = this.prisma[model];
   }
 
-  async find(): Promise<any[]> {
-    return this.model.findMany();
+  async find(query?: any): Promise<any[]> {
+    return this.model.findMany(query);
   }
 
-  async findById(id: number | string): Promise<any | null> {
+  async findById(id: number | string, query?: any): Promise<any | null> {
     return this.model.findUnique({
       where: { id: Number(id) },
+      ...query,
     });
   }
 
-  async create(data: any): Promise<any> {
+  async create(data: any, query?: any): Promise<any> {
     return this.model.create({
       data,
+      ...query,
     });
   }
 
-  async updateById(id: number | string, data: any): Promise<any> {
+  async updateById(id: number | string, data: any, query?: any): Promise<any> {
     return this.model.update({
       where: { id: Number(id) },
+      ...query,
       data,
     });
   }
 
-  async deleteById(id: number | string): Promise<any> {
+  async deleteById(id: number | string, query?: any): Promise<any> {
     return this.model.delete({
       where: { id: Number(id) },
+      ...query,
     });
   }
 
