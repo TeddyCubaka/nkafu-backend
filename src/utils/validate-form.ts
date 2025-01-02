@@ -17,7 +17,7 @@ export function validateForm(
 
     // Vérification des champs requis
     if (
-      field.required &&
+      !field.isOptional &&
       (value === undefined ||
         value === null ||
         (typeof value === 'string' && value.trim() === ''))

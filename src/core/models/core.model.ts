@@ -36,7 +36,7 @@ export class Currency extends BaseModel<'currency'> {
   };
 }
 
-export class User extends BaseModel<'currency'> {
+export class User extends BaseModel<'user'> {
   constructor() {
     super('currency');
   }

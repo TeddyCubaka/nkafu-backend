@@ -30,7 +30,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async findById(id: number | string, query?: any): Promise<any | null> {
     return this.model.findUnique({
-      where: { id: Number(id) },
+      where: { id: id },
       ...query,
     });
   }
@@ -43,8 +43,8 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   async updateById(id: number | string, data: any, query?: any): Promise<any> {
+    query.where = { ...query['where'], id: id };
     return this.model.update({
-      where: { id: Number(id) },
       ...query,
       data,
     });
@@ -52,7 +52,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async deleteById(id: number | string, query?: any): Promise<any> {
     return this.model.delete({
-      where: { id: Number(id) },
+      where: { id: id },
       ...query,
     });
   }
