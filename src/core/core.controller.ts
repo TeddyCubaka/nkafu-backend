@@ -44,7 +44,6 @@ export class CoreController {
         code: 200,
         message: `${data.length} lignes trouvées`,
         data,
-        _queries,
       }))
       .catch((error: any) => {
         const formatedError = formatPrismaError(error);

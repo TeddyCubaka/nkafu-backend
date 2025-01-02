@@ -1,5 +1,5 @@
 import { InputType } from 'src/types/models';
-import { BaseModel, columnType } from './base';
+import { BaseModel, ColumnType } from './base';
 import { Prisma, PrismaClient } from '@prisma/client';
 
 export class Currency extends BaseModel<'currency'> {
@@ -7,7 +7,7 @@ export class Currency extends BaseModel<'currency'> {
     super('currency');
   }
 
-  listColumns: columnType[] = [
+  listColumns: ColumnType[] = [
     { key: 'name', verbose: 'nom' },
     { key: 'symbol', verbose: 'symbole' },
     { key: 'formatKey', verbose: 'abréviation' },
@@ -38,10 +38,10 @@ export class Currency extends BaseModel<'currency'> {
 
 export class User extends BaseModel<'user'> {
   constructor() {
-    super('currency');
+    super('user');
   }
 
-  listColumns: columnType[] = [
+  listColumns: ColumnType[] = [
     { key: 'name', verbose: 'nom' },
     { key: 'mail', verbose: 'adresse mail' },
     { key: 'mobile', verbose: 'mobile' },
@@ -82,6 +82,36 @@ export class User extends BaseModel<'user'> {
     return currency.map((line) => ({
       value: line.id,
       verbose: `${line.name} - (${line.mail})`,
+    }));
+  };
+}
+
+export class Menu extends BaseModel<'menu'> {
+  constructor() {
+    super('menu');
+  }
+
+  listColumns: ColumnType[] = [{ key: 'name', verbose: 'nom' }];
+
+  createForm: InputType[] = [
+    { key: 'name', verbose: 'name', type: 'text' },
+    {
+      key: 'actionId',
+      verbose: 'actions',
+      type: 'multi-select',
+      endpoint: 'autocomplete/core/action',
+    },
+  ];
+
+  updateForm: InputType[] = [...this.createForm];
+
+  autocompleteData: (data: any[]) => {
+    verbose: string;
+    value: string;
+  }[] = (currency) => {
+    return currency.map((line) => ({
+      value: line.id,
+      verbose: `${line.name}`,
     }));
   };
 }

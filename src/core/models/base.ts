@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { prisma } from 'src/lib/prisma';
 import { InputType } from 'src/types/models';
 
-export type columnType = {
+export type ColumnType = {
   key: string;
   verbose: string;
 };
@@ -11,20 +11,26 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   protected prisma;
   protected model;
 
-  abstract listColumns: columnType[] | '*';
+  abstract listColumns: ColumnType[] | '*';
   abstract createForm: InputType[];
   abstract updateForm: InputType[];
   abstract autocompleteData: (data: any[]) => {
     verbose: string;
     value: string;
   }[];
+  preCreateSave: (data: Record<string, any>) => Record<string, any> = (data) =>
+    data;
+  preUpdateSave: (data: Record<string, any>) => Record<string, any> = (data) =>
+    data;
 
   constructor(model: string) {
     this.prisma = prisma;
     this.model = this.prisma[model];
   }
 
-  async find(query?: any): Promise<any[]> {
+  async find(query?: any) {
+    query.select = { ...query.select, ...this.generateInclude() };
+    // return this.generateInclude();
     return this.model.findMany(query);
   }
 
@@ -36,6 +42,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   async create(data: any, query?: any): Promise<any> {
+    data = this.preCreateSave(data);
     return this.model.create({
       data,
       ...query,
@@ -44,6 +51,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async updateById(id: number | string, data: any, query?: any): Promise<any> {
     query.where = { ...query['where'], id: id };
+    data = this.preUpdateSave(data);
     return this.model.update({
       ...query,
       data,
@@ -59,5 +67,25 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async disconnect() {
     await this.prisma.$disconnect();
+  }
+
+  generateInclude(): Record<string, any> {
+    const include: Record<string, any> = { id: true };
+    if (this.listColumns == '*') return {};
+    this.listColumns.forEach((column) => {
+      const keys = column.key.split('.');
+      let currentLevel = include;
+
+      keys.forEach((key, index) => {
+        if (!currentLevel[key]) {
+          currentLevel[key] = index === keys.length - 1 ? true : { select: {} };
+        }
+        if (index < keys.length - 1) {
+          currentLevel = currentLevel[key].select;
+        }
+      });
+    });
+
+    return include;
   }
 }
