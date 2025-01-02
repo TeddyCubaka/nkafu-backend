@@ -51,8 +51,8 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   async deleteById(id: number | string, query?: any): Promise<any> {
+    query.where = { ...query['where'], id: id };
     return this.model.delete({
-      where: { id: id },
       ...query,
     });
   }

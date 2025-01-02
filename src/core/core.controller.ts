@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -197,6 +198,53 @@ export class CoreController {
         code: 200,
         message: `mise à jour réussie`,
         data,
+      }))
+      .catch((error: any) => {
+        const formatedError = formatPrismaError(error);
+        return {
+          code: 400,
+          message: formatedError.message,
+          error: {
+            details: formatedError.details,
+            meta: formatedError.meta,
+          },
+        };
+      });
+
+    return res.status(200).json({
+      ...data,
+      meta: {
+        listColumns: _model.listColumns,
+      },
+    });
+  }
+
+  @Delete('delete/core/:model/:uuid')
+  async delete(
+    @Param('model') model: string,
+    @Param('uuid') uuid: string,
+    @Res() res: Response,
+    @Query() query: { [key: string]: any },
+  ) {
+    const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
+
+    if (!(modelName in config)) {
+      return res.status(200).json({
+        code: 404,
+        message: 'ressource non trouvé dans le système',
+      });
+    }
+    const queriesUtils = new QueriesUtils();
+    const _queries = queriesUtils.toPrismaFilterMap(query);
+
+    const _model = new config[modelName]();
+    const data = await _model
+      .deleteById(uuid, _queries)
+      .then((data) => ({
+        code: 200,
+        message: 'suppression réussie avec succès',
+        data,
+        _queries,
       }))
       .catch((error: any) => {
         const formatedError = formatPrismaError(error);
