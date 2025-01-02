@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import {
-  SignupBodyInterface,
-  SignupPayload,
-} from './interfaces/signup-payload';
+import * as bcrypt from 'bcrypt';
+import { SignupBodyInterface } from './interfaces/signup-payload';
 import { prisma } from 'src/lib/prisma';
 import { Utils } from 'src/utils/utils';
 
@@ -14,13 +12,26 @@ export class AuthService {
     private utils: Utils,
   ) {}
 
-  async login(user: any) {
-    const payload = { username: user.username, sub: user.userId };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
+  async login(reqBody: any) {
+    try {
+      const user = await this.validateUser(
+        reqBody.identifier,
+        reqBody.password,
+      );
 
+      if (user.code >= 400 || 'data' in user == false) return user;
+      const payload = { mobile: user.data.mobile, sub: user.data.id };
+
+      const accessToken = this.jwtService.sign(payload);
+
+      return { ...user, access_token: accessToken };
+    } catch (error) {
+      return {
+        code: 400,
+        message: error.message,
+      };
+    }
+  }
   async signup(user: SignupBodyInterface) {
     let verifyUser = await prisma.user.findFirst({
       where: { mobile: user.mobile },
@@ -67,4 +78,42 @@ export class AuthService {
 
     return savedUser;
   }
+
+  async validateUser(identifier: string, password: string) {
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ mobile: identifier }, { name: identifier }],
+      },
+      include: { userDevices: true },
+    });
+
+    if (user && (await await bcrypt.compare(password, user.password))) {
+      const { password, ...result } = user;
+      return {
+        code: 200,
+        message: 'connexion réussie',
+        data: result,
+      };
+    }
+    return {
+      code: 404,
+      message: 'compte introuvable ou mot de passe incorrect',
+    };
+  }
+
+  async manageUserDevices(user: {
+    id: string;
+    allowedDeviceNumber: Number;
+    userDevices: {
+      id: string;
+      createdAt: Date;
+      userId: string;
+      deviceType: string;
+      os: string;
+      browser: string;
+      ip: string;
+    }[];
+  }, userDevice){
+
+  };
 }

@@ -84,18 +84,19 @@ model User {
   operationsUpdated     Operation[]     @relation("Operation-updatedBy")
   transactionsCreated   Transaction[]   @relation("Operation-createdBy")
   transactionsUpdated   Transaction[]   @relation("Operation-updatedBy")
-  UserDevice            UserDevice[]
+  userDevices           UserDevice[]
 }
 
 model UserDevice {
   id         String   @id @default(cuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
   deviceType String
   os         String
   browser    String
   ip         String
   createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Organization {

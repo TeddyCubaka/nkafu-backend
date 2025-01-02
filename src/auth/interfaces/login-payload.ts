@@ -1,4 +1,4 @@
-interface LoginPayload {
+interface LoginInterface {
   identifier: string;
   password: string;
 }

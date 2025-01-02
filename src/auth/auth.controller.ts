@@ -1,11 +1,21 @@
-import { Body, Controller, Post, Request, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   SignupBodyInterface,
   SignupPayload,
 } from './interfaces/signup-payload';
 import { Utils } from 'src/utils/utils';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -15,9 +25,10 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  async login(@Request() req) {
-    const user = { userId: 1, username: 'test' };
-    return this.authService.login(user);
+  @UseGuards(LocalAuthGuard)
+  async login(@Body() body: LoginInterface, @Req() req: Request) {
+    // return await this.utils.getDeviceInfo(req);
+    return await this.authService.login(body);
   }
 
   @Post('signup')
