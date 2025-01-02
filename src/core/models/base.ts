@@ -29,8 +29,8 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   async findById(id: number | string, query?: any): Promise<any | null> {
+    query.where = { ...query['where'], id: id };
     return this.model.findUnique({
-      where: { id: id },
       ...query,
     });
   }

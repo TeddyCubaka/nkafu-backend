@@ -86,29 +86,6 @@ export class CoreController {
     });
   }
 
-  @Get(':action/core/:model')
-  modelHeads(
-    @Param('model') model: string,
-    @Param('action') action: string,
-    @Res() res: Response,
-  ) {
-    const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
-
-    if (!(modelName in config) || !['create', 'update'].includes(action)) {
-      return res.status(200).json({
-        code: 404,
-        message: 'route non trouvé dans le système',
-      });
-    }
-
-    const _model = new config[modelName]();
-    return res.status(200).json({
-      code: 200,
-      message: 'formullaire trouvé',
-      data: action == 'create' ? _model.createForm : _model.updateForm,
-    });
-  }
-
   @Post('create/core/:model')
   async create(
     @Param('model') model: string,
@@ -263,6 +240,80 @@ export class CoreController {
       meta: {
         listColumns: _model.listColumns,
       },
+    });
+  }
+
+  @Get('list/core/:model/:uuid')
+  async getOne(
+    @Param('model') model: string,
+    @Param('uuid') uuid: string,
+    @Res() res: Response,
+    @Query() query: { [key: string]: any },
+    @Body() body: Record<string, any>,
+  ) {
+    const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
+
+    if (!(modelName in config)) {
+      return res.status(200).json({
+        code: 404,
+        message: 'ressource non trouvé dans le système',
+      });
+    }
+    const queriesUtils = new QueriesUtils();
+    const _queries = queriesUtils.toPrismaFilterMap(query);
+    const _model = new config[modelName]();
+
+    const data = await _model
+      .findById(uuid, _queries)
+      .then((data) => {
+        if (data == null)
+          return {
+            code: 404,
+            message: `aucun enreigistrement trouvé`,
+          };
+        return {
+          code: 200,
+          message: `object trouvé`,
+          data,
+        };
+      })
+      .catch((error: any) => {
+        const formatedError = formatPrismaError(error);
+        return {
+          code: 400,
+          message: formatedError.message,
+          error: {
+            details: formatedError.details,
+            meta: formatedError.meta,
+          },
+        };
+      });
+
+    return res.status(200).json({
+      ...data,
+    });
+  }
+
+  @Get(':action/core/:model')
+  modelHeads(
+    @Param('model') model: string,
+    @Param('action') action: string,
+    @Res() res: Response,
+  ) {
+    const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
+
+    if (!(modelName in config) || !['create', 'update'].includes(action)) {
+      return res.status(200).json({
+        code: 404,
+        message: 'route non trouvé dans le système',
+      });
+    }
+
+    const _model = new config[modelName]();
+    return res.status(200).json({
+      code: 200,
+      message: 'formullaire trouvé',
+      data: action == 'create' ? _model.createForm : _model.updateForm,
     });
   }
 }
