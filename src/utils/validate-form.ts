@@ -13,7 +13,7 @@ export function validateForm(
   const errors: string[] = [];
 
   form.forEach((field) => {
-    const value = data[field.key];
+    const value = data[field.proprety];
 
     // Vérification des champs requis
     if (
@@ -22,7 +22,7 @@ export function validateForm(
         value === null ||
         (typeof value === 'string' && value.trim() === ''))
     ) {
-      errors.push(`Le champ "${field.verbose}" (${field.key}) est requis.`);
+      errors.push(`Le champ "${field.verbose}" (${field.proprety}) est requis.`);
       return;
     }
 
@@ -32,55 +32,55 @@ export function validateForm(
         case 'text':
           if (typeof value !== 'string' || value.trim() === '') {
             errors.push(
-              `Le champ "${field.verbose}" (${field.key}) doit être une chaîne de caractères non vide.`,
+              `Le champ "${field.verbose}" (${field.proprety}) doit être une chaîne de caractères non vide.`,
             );
           }
           break;
         case 'number':
           if (typeof value !== 'number') {
             errors.push(
-              `Le champ "${field.verbose}" (${field.key}) doit être un nombre.`,
+              `Le champ "${field.verbose}" (${field.proprety}) doit être un nombre.`,
             );
           }
           break;
         case 'float':
           if (typeof value !== 'number') {
             errors.push(
-              `Le champ "${field.verbose}" (${field.key}) doit être un nombre décimal.`,
+              `Le champ "${field.verbose}" (${field.proprety}) doit être un nombre décimal.`,
             );
           }
           break;
         case 'boolean':
           if (typeof value !== 'boolean') {
             errors.push(
-              `Le champ "${field.verbose}" (${field.key}) doit être un booléen.`,
+              `Le champ "${field.verbose}" (${field.proprety}) doit être un booléen.`,
             );
           }
           break;
         case 'select':
           if (!field.options?.some((opt) => opt.value === value)) {
             errors.push(
-              `Le champ "${field.verbose}" (${field.key}) contient une valeur non valide.`,
+              `Le champ "${field.verbose}" (${field.proprety}) contient une valeur non valide.`,
             );
           }
           break;
         case 'multi-select':
           if (!Array.isArray(value)) {
             errors.push(
-              `Le champ "${field.verbose}" (${field.key}) doit être un tableau.`,
+              `Le champ "${field.verbose}" (${field.proprety}) doit être un tableau.`,
             );
           } else if (
             !value.every((v) => field.options?.some((opt) => opt.value === v))
           ) {
             errors.push(
-              `Le champ "${field.verbose}" (${field.key}) contient des valeurs non valides.`,
+              `Le champ "${field.verbose}" (${field.proprety}) contient des valeurs non valides.`,
             );
           }
           break;
         case 'date':
           if (isNaN(Date.parse(value))) {
             errors.push(
-              `Le champ "${field.verbose}" (${field.key}) doit être une date valide.`,
+              `Le champ "${field.verbose}" (${field.proprety}) doit être une date valide.`,
             );
           }
           break;
@@ -94,7 +94,7 @@ export function validateForm(
           break;
         default:
           errors.push(
-            `Type de champ inconnu pour "${field.verbose}" (${field.key}).`,
+            `Type de champ inconnu pour "${field.verbose}" (${field.proprety}).`,
           );
           break;
       }

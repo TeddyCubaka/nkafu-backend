@@ -8,17 +8,17 @@ export class Currency extends BaseModel<'currency'> {
   }
 
   listColumns: ColumnType[] = [
-    { key: 'name', verbose: 'nom' },
-    { key: 'symbol', verbose: 'symbole' },
-    { key: 'formatKey', verbose: 'abréviation' },
-    { key: 'exchangeRate', verbose: 'taux de change' },
+    { proprety: 'name', verbose: 'nom' },
+    { proprety: 'symbol', verbose: 'symbole' },
+    { proprety: 'formatproprety', verbose: 'abréviation' },
+    { proprety: 'exchangeRate', verbose: 'taux de change' },
   ];
 
   createForm: InputType[] = [
-    { verbose: 'nom', key: 'name', type: 'text' },
-    { verbose: 'symbole', key: 'symbol', type: 'text' },
-    { verbose: 'abréviation', key: 'formatKey', type: 'text' },
-    { verbose: 'taux de change', key: 'exchangeRate', type: 'number' },
+    { verbose: 'nom', proprety: 'name', type: 'text' },
+    { verbose: 'symbole', proprety: 'symbol', type: 'text' },
+    { verbose: 'abréviation', proprety: 'formatproprety', type: 'text' },
+    { verbose: 'taux de change', proprety: 'exchangeRate', type: 'number' },
   ];
 
   updateForm: InputType[] = this.createForm;
@@ -42,31 +42,31 @@ export class User extends BaseModel<'user'> {
   }
 
   listColumns: ColumnType[] = [
-    { key: 'name', verbose: 'nom' },
-    { key: 'mail', verbose: 'adresse mail' },
-    { key: 'mobile', verbose: 'mobile' },
-    { key: 'isRoot', verbose: 'est root' },
-    { key: 'isActive', verbose: 'actif' },
-    { key: 'mustRenewPassword', verbose: 'doit renouveller son mot de passe' },
-    { key: 'allowedDeviceNumber', verbose: 'nombre des devices max' },
-    { key: 'role.name', verbose: 'rôle' },
+    { proprety: 'name', verbose: 'nom' },
+    { proprety: 'mail', verbose: 'adresse mail' },
+    { proprety: 'mobile', verbose: 'mobile' },
+    { proprety: 'isRoot', verbose: 'est root' },
+    { proprety: 'isActive', verbose: 'actif' },
+    { proprety: 'mustRenewPassword', verbose: 'doit renouveller son mot de passe' },
+    { proprety: 'allowedDeviceNumber', verbose: 'nombre des devices max' },
+    { proprety: 'role.name', verbose: 'rôle' },
   ];
 
   createForm: InputType[] = [
-    { key: 'name', verbose: 'name', type: 'text' },
-    { key: 'password', verbose: 'password', type: 'text' },
-    { key: 'mail', verbose: 'mail', type: 'text' },
-    { key: 'mobile', verbose: 'mobile', type: 'text' },
-    { key: 'isRoot', verbose: 'isRoot', type: 'text' },
-    { key: 'isActive', verbose: 'isActive', type: 'text' },
+    { proprety: 'name', verbose: 'name', type: 'text' },
+    { proprety: 'password', verbose: 'password', type: 'text' },
+    { proprety: 'mail', verbose: 'mail', type: 'text' },
+    { proprety: 'mobile', verbose: 'mobile', type: 'text' },
+    { proprety: 'isRoot', verbose: 'isRoot', type: 'text' },
+    { proprety: 'isActive', verbose: 'isActive', type: 'text' },
     {
-      key: 'roleId',
+      proprety: 'roleId',
       verbose: 'roleId',
       type: 'select',
       endpoint: 'autocomplete/core/role',
     },
     {
-      key: 'userPrivileges.name',
+      proprety: 'userPrivileges.name',
       verbose: 'privilège',
       type: 'multi-select',
       endpoint: 'autocomplete/core/role',
@@ -91,16 +91,45 @@ export class Menu extends BaseModel<'menu'> {
     super('menu');
   }
 
-  listColumns: ColumnType[] = [{ key: 'name', verbose: 'nom' }];
+  listColumns: ColumnType[] = [{ proprety: 'name', verbose: 'nom' }];
 
   createForm: InputType[] = [
-    { key: 'name', verbose: 'name', type: 'text' },
+    { proprety: 'name', verbose: 'name', type: 'text' },
     {
-      key: 'actionId',
+      proprety: 'actionId',
       verbose: 'actions',
       type: 'multi-select',
       endpoint: 'autocomplete/core/action',
     },
+  ];
+
+  updateForm: InputType[] = [...this.createForm];
+
+  autocompleteData: (data: any[]) => {
+    verbose: string;
+    value: string;
+  }[] = (currency) => {
+    return currency.map((line) => ({
+      value: line.id,
+      verbose: `${line.name}`,
+    }));
+  };
+}
+
+export class Action extends BaseModel<'action'> {
+  constructor() {
+    super('action');
+  }
+
+  listColumns: ColumnType[] = [
+    { proprety: 'name', verbose: 'nom' },
+    { proprety: 'path', verbose: 'nom' },
+    { proprety: 'method', verbose: 'nom' },
+  ];
+  createForm: InputType[] = [
+    { proprety: 'name', verbose: 'name', type: 'text' },
+    { proprety: 'path', verbose: 'path', type: 'text' },
+    { proprety: 'method', verbose: 'method', type: 'text' },
   ];
 
   updateForm: InputType[] = [...this.createForm];

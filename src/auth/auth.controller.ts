@@ -26,9 +26,13 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(LocalAuthGuard)
-  async login(@Body() body: LoginInterface, @Req() req: Request) {
-    // return await this.utils.getDeviceInfo(req);
-    return await this.authService.login(body);
+  async login(
+    @Body() body: LoginInterface,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const data = await this.authService.login(body);
+    return res.status(data.code).json(data);
   }
 
   @Post('signup')

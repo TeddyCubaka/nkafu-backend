@@ -2,7 +2,7 @@ export type DisplayColumn = { key: string; header: string };
 
 export type InputType = {
   verbose: string;
-  key: string;
+  proprety: string;
   type:
     | 'text'
     | 'number'

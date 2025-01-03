@@ -83,8 +83,15 @@ export class AuthService {
     const user = await prisma.user.findFirst({
       where: {
         OR: [{ mobile: identifier }, { name: identifier }],
+        isActive: true,
+        isDeleted: false,
       },
-      include: { userDevices: true },
+      include: {
+        userDevices: true,
+        agent: {
+          include: { wallets: { include: { currency: true } } },
+        },
+      },
     });
 
     if (user && (await await bcrypt.compare(password, user.password))) {
@@ -101,19 +108,20 @@ export class AuthService {
     };
   }
 
-  async manageUserDevices(user: {
-    id: string;
-    allowedDeviceNumber: Number;
-    userDevices: {
+  async manageUserDevices(
+    user: {
       id: string;
-      createdAt: Date;
-      userId: string;
-      deviceType: string;
-      os: string;
-      browser: string;
-      ip: string;
-    }[];
-  }, userDevice){
-
-  };
+      allowedDeviceNumber: Number;
+      userDevices: {
+        id: string;
+        createdAt: Date;
+        userId: string;
+        deviceType: string;
+        os: string;
+        browser: string;
+        ip: string;
+      }[];
+    },
+    userDevice,
+  ) {}
 }
