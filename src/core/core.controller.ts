@@ -7,24 +7,30 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { CoreService } from './core.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import * as config from './models/core.model';
 import { QueriesUtils } from 'src/utils/query-to-prisma-params';
 import { formatPrismaError } from 'src/utils/format-prisma-error';
 import { validateForm } from 'src/utils/validate-form';
+import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('')
 export class CoreController {
   constructor(private readonly coreService: CoreService) {}
 
   @Get('list/core/:model')
+  @UseGuards(JwtAuthGuard)
   async list(
     @Param('model') model: string,
     @Res() res: Response,
     @Query() query: { [key: string]: any },
+    @Req() req: Request,
   ) {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
@@ -66,6 +72,7 @@ export class CoreController {
   }
 
   @Get('autocomplete/core/:model')
+  @UseGuards(JwtAuthGuard)
   async modelAutocomple(@Param('model') model: string, @Res() res: Response) {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
@@ -86,6 +93,7 @@ export class CoreController {
   }
 
   @Post('create/core/:model')
+  @UseGuards(JwtAuthGuard)
   async create(
     @Param('model') model: string,
     @Res() res: Response,
@@ -141,6 +149,7 @@ export class CoreController {
   }
 
   @Patch('update/core/:model/:uuid')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('model') model: string,
     @Param('uuid') uuid: string,
@@ -196,6 +205,7 @@ export class CoreController {
   }
 
   @Delete('delete/core/:model/:uuid')
+  @UseGuards(JwtAuthGuard)
   async delete(
     @Param('model') model: string,
     @Param('uuid') uuid: string,
@@ -243,6 +253,7 @@ export class CoreController {
   }
 
   @Get('list/core/:model/:uuid')
+  @UseGuards(JwtAuthGuard)
   async getOne(
     @Param('model') model: string,
     @Param('uuid') uuid: string,
@@ -294,6 +305,7 @@ export class CoreController {
   }
 
   @Get(':action/core/:model')
+  @UseGuards(JwtAuthGuard)
   modelHeads(
     @Param('model') model: string,
     @Param('action') action: string,

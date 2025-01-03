@@ -20,7 +20,12 @@ export class AuthService {
       );
 
       if (user.code >= 400 || 'data' in user == false) return user;
-      const payload = { mobile: user.data.mobile, sub: user.data.id };
+      const payload = {
+        mobile: user.data.mobile,
+        sub: user.data.id,
+        mail: user.data.mail,
+        roleId: user.data.roleId,
+      };
 
       const accessToken = this.jwtService.sign(payload);
 
