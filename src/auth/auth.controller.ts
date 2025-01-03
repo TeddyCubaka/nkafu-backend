@@ -48,4 +48,10 @@ export class AuthController {
     const response = await this.authService.signup(body);
     return res.status(response.code).json(response);
   }
+
+  @Get('verify-token')
+  @UseGuards(JwtAuthGuard)
+  verifyToken() {
+    return { code: 200, message: 'Token is valid' };
+  }
 }
