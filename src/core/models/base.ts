@@ -43,6 +43,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async create(data: any, query?: any): Promise<any> {
     data = this.preCreateSave(data);
+    console.log(data)
     return this.model.create({
       data,
       ...query,

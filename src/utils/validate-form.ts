@@ -69,13 +69,14 @@ export function validateForm(
             errors.push(
               `Le champ "${field.verbose}" (${field.proprety}) doit être un tableau.`,
             );
-          } else if (
-            !value.every((v) => field.options?.some((opt) => opt.value === v))
-          ) {
-            errors.push(
-              `Le champ "${field.verbose}" (${field.proprety}) contient des valeurs non valides.`,
-            );
-          }
+          } 
+          // else if (
+          //   !value.every((v) => field.options?.some((opt) => opt.value === v))
+          // ) {
+          //   errors.push(
+          //     `Le champ "${field.verbose}" (${field.proprety}) contient des valeurs non valides.`,
+          //   );
+          // }
           break;
         case 'date':
           if (isNaN(Date.parse(value))) {

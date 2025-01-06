@@ -47,7 +47,10 @@ export class User extends BaseModel<'user'> {
     { proprety: 'mobile', verbose: 'mobile' },
     { proprety: 'isRoot', verbose: 'est root' },
     { proprety: 'isActive', verbose: 'actif' },
-    { proprety: 'mustRenewPassword', verbose: 'doit renouveller son mot de passe' },
+    {
+      proprety: 'mustRenewPassword',
+      verbose: 'doit renouveller son mot de passe',
+    },
     { proprety: 'allowedDeviceNumber', verbose: 'nombre des devices max' },
     { proprety: 'role.name', verbose: 'rôle' },
   ];
@@ -96,7 +99,7 @@ export class Menu extends BaseModel<'menu'> {
   createForm: InputType[] = [
     { proprety: 'name', verbose: 'name', type: 'text' },
     {
-      proprety: 'actionId',
+      proprety: 'menuActions',
       verbose: 'actions',
       type: 'multi-select',
       endpoint: 'autocomplete/core/action',
@@ -104,6 +107,15 @@ export class Menu extends BaseModel<'menu'> {
   ];
 
   updateForm: InputType[] = [...this.createForm];
+
+  preCreateSave = (data: Record<string, any>) => {
+    return {
+      name: data.name,
+      menuActions: {
+        create: data.menuActions.map((actionId) => ({ actionId })),
+      },
+    };
+  };
 
   autocompleteData: (data: any[]) => {
     verbose: string;
@@ -123,13 +135,23 @@ export class Action extends BaseModel<'action'> {
 
   listColumns: ColumnType[] = [
     { proprety: 'name', verbose: 'nom' },
-    { proprety: 'path', verbose: 'nom' },
-    { proprety: 'method', verbose: 'nom' },
+    { proprety: 'path', verbose: 'path' },
+    { proprety: 'method', verbose: 'methode' },
   ];
   createForm: InputType[] = [
     { proprety: 'name', verbose: 'name', type: 'text' },
     { proprety: 'path', verbose: 'path', type: 'text' },
-    { proprety: 'method', verbose: 'method', type: 'text' },
+    {
+      proprety: 'method',
+      verbose: 'method',
+      type: 'select',
+      options: [
+        { label: 'VOIR', value: 'GET' },
+        { label: 'CREER', value: 'POST' },
+        { label: 'CHANGER', value: 'PATCH' },
+        { label: 'SUPPRIMER', value: 'DELETE' },
+      ],
+    },
   ];
 
   updateForm: InputType[] = [...this.createForm];

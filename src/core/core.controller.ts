@@ -87,7 +87,7 @@ export class CoreController {
     const data = await _model.find({});
     return res.status(200).json({
       code: 200,
-      message: 'formullaire trouvé',
+      message: 'données trouvées',
       data: _model.autocompleteData(data),
     });
   }
@@ -148,7 +148,7 @@ export class CoreController {
     });
   }
 
-  @Patch('update/core/:model/:uuid')
+  @Patch('change/core/:model/:uuid')
   @UseGuards(JwtAuthGuard)
   async update(
     @Param('model') model: string,
@@ -313,7 +313,7 @@ export class CoreController {
   ) {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
-    if (!(modelName in config) || !['create', 'update'].includes(action)) {
+    if (!(modelName in config) || !['create', 'change'].includes(action)) {
       return res.status(200).json({
         code: 404,
         message: 'route non trouvé dans le système',
