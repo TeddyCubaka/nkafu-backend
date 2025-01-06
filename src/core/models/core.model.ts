@@ -26,12 +26,12 @@ export class Currency extends BaseModel<'currency'> {
   data = new PrismaClient().currency.findMany();
 
   autocompleteData: (data: any[]) => {
-    verbose: string;
+    label: string;
     value: string;
   }[] = (currency) => {
     return currency.map((line) => ({
       value: line.id,
-      verbose: line.name,
+      label: line.name,
     }));
   };
 }
@@ -79,12 +79,12 @@ export class User extends BaseModel<'user'> {
   updateForm: InputType[] = [...this.createForm];
 
   autocompleteData: (data: any[]) => {
-    verbose: string;
+    label: string;
     value: string;
   }[] = (currency) => {
     return currency.map((line) => ({
       value: line.id,
-      verbose: `${line.name} - (${line.mail})`,
+      label: `${line.name} - (${line.mail})`,
     }));
   };
 }
@@ -117,15 +117,41 @@ export class Menu extends BaseModel<'menu'> {
     };
   };
 
+  preUpdateSave = (data: Record<string, any>) => {
+    return {
+      name: data.name,
+      menuActions: {
+        create: data.menuActions.map((actionId) => ({ actionId })),
+      },
+    };
+  };
+
   autocompleteData: (data: any[]) => {
-    verbose: string;
+    label: string;
     value: string;
   }[] = (currency) => {
     return currency.map((line) => ({
       value: line.id,
-      verbose: `${line.name}`,
+      label: `${line.name}`,
     }));
   };
+
+  async findById(id: number | string, query?: any): Promise<any | null> {
+    query.where = { ...query['where'], id: id };
+    query.include = {
+      ...query['include'],
+      menuActions: { include: { action: true } },
+    };
+    const data = await this.model
+      .findUnique({
+        ...query,
+      })
+      .then((data) => ({
+        ...data,
+        menuActions: data.menuActions.map((data) => data.action.id),
+      }));
+    return data;
+  }
 }
 
 export class Action extends BaseModel<'action'> {
@@ -157,12 +183,12 @@ export class Action extends BaseModel<'action'> {
   updateForm: InputType[] = [...this.createForm];
 
   autocompleteData: (data: any[]) => {
-    verbose: string;
+    label: string;
     value: string;
   }[] = (currency) => {
     return currency.map((line) => ({
+      label: `${line.name}`,
       value: line.id,
-      verbose: `${line.name}`,
     }));
   };
 }

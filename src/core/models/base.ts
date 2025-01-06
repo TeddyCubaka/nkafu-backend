@@ -15,9 +15,10 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   abstract createForm: InputType[];
   abstract updateForm: InputType[];
   abstract autocompleteData: (data: any[]) => {
-    verbose: string;
+    label: string;
     value: string;
   }[];
+
   preCreateSave: (data: Record<string, any>) => Record<string, any> = (data) =>
     data;
   preUpdateSave: (data: Record<string, any>) => Record<string, any> = (data) =>
@@ -30,7 +31,6 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async find(query?: any) {
     query.select = { ...query.select, ...this.generateInclude() };
-    // return this.generateInclude();
     return this.model.findMany(query);
   }
 
@@ -43,7 +43,6 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async create(data: any, query?: any): Promise<any> {
     data = this.preCreateSave(data);
-    console.log(data)
     return this.model.create({
       data,
       ...query,
