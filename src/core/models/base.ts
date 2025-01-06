@@ -19,10 +19,14 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     value: string;
   }[];
 
+  postFindOne: (data: Record<string, any>) => Record<string, any> = (data) =>
+    data;
   preCreateSave: (data: Record<string, any>) => Record<string, any> = (data) =>
     data;
-  preUpdateSave: (data: Record<string, any>) => Record<string, any> = (data) =>
-    data;
+  preUpdateSave: (
+    id: string,
+    data: Record<string, any>,
+  ) => Record<string, any> = (id, data) => data;
 
   constructor(model: string) {
     this.prisma = prisma;
@@ -31,14 +35,17 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async find(query?: any) {
     query.select = { ...query.select, ...this.generateInclude() };
+    query.where = { ...query['where'], isDeleted: false };
     return this.model.findMany(query);
   }
 
   async findById(id: number | string, query?: any): Promise<any | null> {
-    query.where = { ...query['where'], id: id };
-    return this.model.findUnique({
-      ...query,
-    });
+    query.where = { ...query['where'], id: id, isDeleted: false };
+    return this.postFindOne(
+      await this.model.findUnique({
+        ...query,
+      }),
+    );
   }
 
   async create(data: any, query?: any): Promise<any> {
@@ -49,9 +56,10 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     });
   }
 
-  async updateById(id: number | string, data: any, query?: any): Promise<any> {
+  async updateById(id: string, data: any, query?: any): Promise<any> {
     query.where = { ...query['where'], id: id };
-    data = this.preUpdateSave(data);
+    data = await this.preUpdateSave(id, data);
+
     return this.model.update({
       ...query,
       data,
@@ -60,8 +68,9 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async deleteById(id: number | string, query?: any): Promise<any> {
     query.where = { ...query['where'], id: id };
-    return this.model.delete({
+    return this.model.update({
       ...query,
+      data: { isDeleted: true },
     });
   }
 

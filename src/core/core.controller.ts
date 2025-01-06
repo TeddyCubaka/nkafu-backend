@@ -168,7 +168,7 @@ export class CoreController {
     const queriesUtils = new QueriesUtils();
     const _queries = queriesUtils.toPrismaFilterMap(query);
     const _model = new config[modelName]();
-    const validationStatus = validateForm(_model.createForm, body);
+    const validationStatus = validateForm(_model.updateForm, body);
     if (validationStatus !== true) {
       return res.status(200).json({
         code: 400,
@@ -198,9 +198,9 @@ export class CoreController {
 
     return res.status(200).json({
       ...data,
-      meta: {
-        listColumns: _model.listColumns,
-      },
+      // meta: {
+      //   listColumns: _model.listColumns,
+      // },
     });
   }
 
@@ -230,7 +230,6 @@ export class CoreController {
         code: 200,
         message: 'suppression réussie avec succès',
         data,
-        _queries,
       }))
       .catch((error: any) => {
         const formatedError = formatPrismaError(error);
@@ -299,7 +298,7 @@ export class CoreController {
         };
       });
 
-    return res.status(200).json({
+    return res.status(data.code).json({
       ...data,
     });
   }

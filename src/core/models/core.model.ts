@@ -60,23 +60,50 @@ export class User extends BaseModel<'user'> {
     { proprety: 'password', verbose: 'password', type: 'text' },
     { proprety: 'mail', verbose: 'mail', type: 'text' },
     { proprety: 'mobile', verbose: 'mobile', type: 'text' },
-    { proprety: 'isRoot', verbose: 'isRoot', type: 'text' },
-    { proprety: 'isActive', verbose: 'isActive', type: 'text' },
+    { proprety: 'isRoot', verbose: 'isRoot', type: 'boolean' },
+    { proprety: 'isActive', verbose: 'isActive', type: 'boolean' },
+    {
+      proprety: 'allowedDeviceNumber',
+      verbose: 'nombre des devices max',
+      type: 'number',
+    },
     {
       proprety: 'roleId',
       verbose: 'roleId',
       type: 'select',
       endpoint: 'autocomplete/core/role',
+      isOptional: true,
     },
     {
-      proprety: 'userPrivileges.name',
+      proprety: 'userPrivileges',
       verbose: 'privilège',
       type: 'multi-select',
       endpoint: 'autocomplete/core/role',
     },
   ];
 
-  updateForm: InputType[] = [...this.createForm];
+  updateForm: InputType[] = [
+    ...this.createForm.filter((field) => field.proprety != 'password'),
+  ];
+
+  preCreateSave = (data: Record<string, any>) => {
+    return {
+      ...data,
+      userPrivileges: {
+        create: data.menuActions.map((actionId) => ({ actionId })),
+      },
+    };
+  };
+
+  preUpdateSave = async (id: string, data: Record<string, any>) => {
+    await this.prisma.userPrivilege.deleteMany({ where: { userId: id } });
+    return {
+      ...data,
+      userPrivileges: {
+        create: data.userPrivileges.map((actionId) => ({ actionId })),
+      },
+    };
+  };
 
   autocompleteData: (data: any[]) => {
     label: string;
@@ -86,6 +113,11 @@ export class User extends BaseModel<'user'> {
       value: line.id,
       label: `${line.name} - (${line.mail})`,
     }));
+  };
+
+  postFindOne: (data: Record<string, any>) => Record<string, any> = (data) => {
+    delete data.password;
+    return data;
   };
 }
 
@@ -117,7 +149,8 @@ export class Menu extends BaseModel<'menu'> {
     };
   };
 
-  preUpdateSave = (data: Record<string, any>) => {
+  preUpdateSave = async (id: string, data: Record<string, any>) => {
+    await this.prisma.menuAction.deleteMany({ where: { menuId: id } });
     return {
       name: data.name,
       menuActions: {
@@ -137,19 +170,21 @@ export class Menu extends BaseModel<'menu'> {
   };
 
   async findById(id: number | string, query?: any): Promise<any | null> {
-    query.where = { ...query['where'], id: id };
+    query.where = { ...query['where'], id: id, isDeleted: false };
     query.include = {
       ...query['include'],
       menuActions: { include: { action: true } },
     };
-    const data = await this.model
-      .findUnique({
-        ...query,
-      })
-      .then((data) => ({
-        ...data,
-        menuActions: data.menuActions.map((data) => data.action.id),
-      }));
+    let data = await this.model.findUnique({
+      ...query,
+    });
+    if (data == null) return data;
+    data = {
+      ...data,
+      menuActions: data.menuActions.map((data) => data.action.id),
+    };
+
+    data.menuActions = [...new Set(data.menuActions)];
     return data;
   }
 }
