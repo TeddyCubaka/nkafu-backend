@@ -1,6 +1,7 @@
 import { InputType } from 'src/types/models';
 import { BaseModel, ColumnType } from './base';
 import { Prisma, PrismaClient } from '@prisma/client';
+import { Utils } from 'src/utils/utils';
 
 export class Currency extends BaseModel<'currency'> {
   constructor() {
@@ -78,7 +79,7 @@ export class User extends BaseModel<'user'> {
       proprety: 'userPrivileges',
       verbose: 'privilège',
       type: 'multi-select',
-      endpoint: 'autocomplete/core/role',
+      endpoint: 'autocomplete/core/action',
     },
   ];
 
@@ -86,11 +87,30 @@ export class User extends BaseModel<'user'> {
     ...this.createForm.filter((field) => field.proprety != 'password'),
   ];
 
-  preCreateSave = (data: Record<string, any>) => {
+  preCreateSave = async (data: Record<string, any>) => {
+    let verifyUser = await this.model.findFirst({
+      where: { mobile: data.mobile },
+    });
+
+    if (verifyUser !== null)
+      throw new Error('ce numero de telephone est deja utilisé');
+
+    verifyUser = await this.model.findFirst({
+      where: { mobile: data.mobile },
+    });
+
+    if (verifyUser !== null)
+      throw new Error("ce nom d'utilisateur est deja prise");
+
+    const utils = new Utils();
+
+    const hashedPassword = await utils.hashPassword(data.password);
+
     return {
       ...data,
+      password: hashedPassword,
       userPrivileges: {
-        create: data.menuActions.map((actionId) => ({ actionId })),
+        create: data.userPrivileges.map((actionId) => ({ actionId })),
       },
     };
   };
@@ -115,10 +135,11 @@ export class User extends BaseModel<'user'> {
     }));
   };
 
-  postFindOne: (data: Record<string, any>) => Record<string, any> = (data) => {
-    delete data.password;
-    return data;
-  };
+  postFindOne: (data: Record<string, any>) => Promise<Record<string, any>> =
+    async (data) => {
+      delete data.password;
+      return data;
+    };
 }
 
 export class Menu extends BaseModel<'menu'> {
@@ -144,9 +165,9 @@ export class Menu extends BaseModel<'menu'> {
 
   updateForm: InputType[] = [...this.createForm];
 
-  preCreateSave = (data: Record<string, any>) => {
+  preCreateSave = async (data: Record<string, any>) => {
     return {
-      name: data.name,
+      ...data,
       menuActions: {
         create: data.menuActions.map((actionId) => ({ actionId })),
       },
@@ -156,7 +177,7 @@ export class Menu extends BaseModel<'menu'> {
   preUpdateSave = async (id: string, data: Record<string, any>) => {
     await this.prisma.menuAction.deleteMany({ where: { menuId: id } });
     return {
-      name: data.name,
+      ...data,
       menuActions: {
         create: data.menuActions.map((actionId) => ({ actionId })),
       },
@@ -230,4 +251,74 @@ export class Action extends BaseModel<'action'> {
       value: line.id,
     }));
   };
+}
+
+export class Role extends BaseModel<'role'> {
+  constructor() {
+    super('role');
+  }
+
+  listColumns: ColumnType[] = [
+    { proprety: 'id', verbose: 'pk' },
+    { proprety: 'name', verbose: 'nom' },
+  ];
+  createForm: InputType[] = [
+    { proprety: 'name', verbose: 'name', type: 'text' },
+    {
+      proprety: 'roleActions',
+      verbose: 'permissions',
+      type: 'multi-select',
+      endpoint: 'autocomplete/core/action',
+    },
+  ];
+
+  updateForm: InputType[] = [...this.createForm];
+
+  autocompleteData: (data: any[]) => {
+    label: string;
+    value: string;
+  }[] = (currency) => {
+    return currency.map((line) => ({
+      label: `${line.name}`,
+      value: line.id,
+    }));
+  };
+
+  preCreateSave = async (data: Record<string, any>) => {
+    return {
+      name: data.name,
+      roleActions: {
+        create: data.roleActions.map((actionId) => ({ actionId })),
+      },
+    };
+  };
+
+  preUpdateSave = async (id: string, data: Record<string, any>) => {
+    await this.prisma.menuAction.deleteMany({ where: { menuId: id } });
+    return {
+      name: data.name,
+      roleActions: {
+        create: data.roleActions.map((actionId) => ({ actionId })),
+      },
+    };
+  };
+
+  async findById(id: number | string, query?: any): Promise<any | null> {
+    query.where = { ...query['where'], id: id, isDeleted: false };
+    query.include = {
+      ...query['include'],
+      roleActions: { include: { action: true } },
+    };
+    let data = await this.model.findUnique({
+      ...query,
+    });
+    if (data == null) return data;
+    data = {
+      ...data,
+      roleActions: data.roleActions.map((data) => data.action.id),
+    };
+
+    data.roleActions = [...new Set(data.roleActions)];
+    return data;
+  }
 }

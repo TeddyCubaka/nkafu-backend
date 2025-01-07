@@ -19,14 +19,20 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     value: string;
   }[];
 
-  postFindOne: (data: Record<string, any>) => Record<string, any> = (data) =>
-    data;
-  preCreateSave: (data: Record<string, any>) => Record<string, any> = (data) =>
-    data;
+  postFindOne: (data: Record<string, any>) => Promise<Record<string, any>> =
+    async (data) => {
+      return data;
+    };
+  preCreateSave: (data: Record<string, any>) => Promise<Record<string, any>> =
+    async (data) => {
+      return data;
+    };
   preUpdateSave: (
     id: string,
     data: Record<string, any>,
-  ) => Record<string, any> = (id, data) => data;
+  ) => Promise<Record<string, any>> = async (id, data) => {
+    return data;
+  };
 
   constructor(model: string) {
     this.prisma = prisma;
@@ -41,7 +47,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async findById(id: number | string, query?: any): Promise<any | null> {
     query.where = { ...query['where'], id: id, isDeleted: false };
-    return this.postFindOne(
+    return await this.postFindOne(
       await this.model.findUnique({
         ...query,
       }),
@@ -49,7 +55,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   async create(data: any, query?: any): Promise<any> {
-    data = this.preCreateSave(data);
+    data = await this.preCreateSave(data);
     return this.model.create({
       data,
       ...query,
@@ -59,6 +65,8 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   async updateById(id: string, data: any, query?: any): Promise<any> {
     query.where = { ...query['where'], id: id };
     data = await this.preUpdateSave(id, data);
+
+    console.log(data);
 
     return this.model.update({
       ...query,

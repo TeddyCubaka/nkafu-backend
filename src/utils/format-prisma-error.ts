@@ -17,7 +17,7 @@ interface FormattedError {
 export function formatPrismaError(error: PrismaError): FormattedError {
   let formattedError: FormattedError = {
     code: 400,
-    message: "Une erreur s'est produite",
+    message: error.message,
     details: {},
   };
 

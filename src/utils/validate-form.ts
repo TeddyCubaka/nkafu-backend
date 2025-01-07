@@ -22,7 +22,9 @@ export function validateForm(
         value === null ||
         (typeof value === 'string' && value.trim() === ''))
     ) {
-      errors.push(`Le champ "${field.verbose}" (${field.proprety}) est requis.`);
+      errors.push(
+        `Le champ "${field.verbose}" (${field.proprety}) est requis.`,
+      );
       return;
     }
 
@@ -58,7 +60,13 @@ export function validateForm(
           }
           break;
         case 'select':
-          if (!field.options?.some((opt) => opt.value === value)) {
+          if (field.endpoint) {
+            if (value.length < 4)
+              errors.push(
+                `Le champ "${field.verbose}" (${field.proprety}) contient une valeur non valide.`,
+              );
+          } else if (!field.options?.some((opt) => opt.value === value)) {
+            console.log(field.endpoint);
             errors.push(
               `Le champ "${field.verbose}" (${field.proprety}) contient une valeur non valide.`,
             );
@@ -69,7 +77,7 @@ export function validateForm(
             errors.push(
               `Le champ "${field.verbose}" (${field.proprety}) doit être un tableau.`,
             );
-          } 
+          }
           // else if (
           //   !value.every((v) => field.options?.some((opt) => opt.value === v))
           // ) {
