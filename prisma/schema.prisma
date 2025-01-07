@@ -194,6 +194,7 @@ model UserPrivilege {
 
 model Menu {
   id        String  @id @unique @default(uuid())
+  icon      String?
   name      String
   isDefault Boolean @default(false)
 

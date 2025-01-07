@@ -35,7 +35,7 @@ export class CoreController {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
     if (!(modelName in config)) {
-      return res.status(200).json({
+      return res.status(404).json({
         code: 404,
         message: 'ressource non trouvé dans le système',
       });
@@ -63,7 +63,7 @@ export class CoreController {
         };
       });
 
-    return res.status(200).json({
+    return res.status(data.code).json({
       ...data,
       meta: {
         listColumns: _model.listColumns,
@@ -77,7 +77,7 @@ export class CoreController {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
     if (!(modelName in config)) {
-      return res.status(200).json({
+      return res.status(404).json({
         code: 404,
         message: 'route non trouvé dans le système',
       });
@@ -103,7 +103,7 @@ export class CoreController {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
     if (!(modelName in config)) {
-      return res.status(200).json({
+      return res.status(404).json({
         code: 404,
         message: 'ressource non trouvé dans le système',
       });
@@ -113,7 +113,7 @@ export class CoreController {
     const _model = new config[modelName]();
     const validationStatus = validateForm(_model.createForm, body);
     if (validationStatus !== true) {
-      return res.status(200).json({
+      return res.status(400).json({
         code: 400,
         message: 'la validation a echoue',
         validationStatus,
@@ -140,7 +140,7 @@ export class CoreController {
         };
       });
 
-    return res.status(200).json({
+    return res.status(data.code).json({
       ...data,
       meta: {
         listColumns: _model.listColumns,
@@ -160,7 +160,7 @@ export class CoreController {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
     if (!(modelName in config)) {
-      return res.status(200).json({
+      return res.status(404).json({
         code: 404,
         message: 'ressource non trouvé dans le système',
       });
@@ -196,7 +196,7 @@ export class CoreController {
         };
       });
 
-    return res.status(200).json({
+    return res.status(data.code).json({
       ...data,
       // meta: {
       //   listColumns: _model.listColumns,
@@ -215,7 +215,7 @@ export class CoreController {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
     if (!(modelName in config)) {
-      return res.status(200).json({
+      return res.status(404).json({
         code: 404,
         message: 'ressource non trouvé dans le système',
       });
@@ -263,7 +263,7 @@ export class CoreController {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
     if (!(modelName in config)) {
-      return res.status(200).json({
+      return res.status(404).json({
         code: 404,
         message: 'ressource non trouvé dans le système',
       });
@@ -313,7 +313,7 @@ export class CoreController {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
     if (!(modelName in config) || !['create', 'change'].includes(action)) {
-      return res.status(200).json({
+      return res.status(404).json({
         code: 404,
         message: 'route non trouvé dans le système',
       });

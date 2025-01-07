@@ -126,9 +126,13 @@ export class Menu extends BaseModel<'menu'> {
     super('menu');
   }
 
-  listColumns: ColumnType[] = [{ proprety: 'name', verbose: 'nom' }];
+  listColumns: ColumnType[] = [
+    { proprety: 'icon', verbose: 'icone' },
+    { proprety: 'name', verbose: 'nom' },
+  ];
 
   createForm: InputType[] = [
+    { proprety: 'icon', verbose: 'icone', type: 'text' },
     { proprety: 'name', verbose: 'name', type: 'text' },
     {
       proprety: 'menuActions',
