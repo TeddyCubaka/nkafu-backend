@@ -134,6 +134,8 @@ model Action {
   roleActions    RoleAction[]
   userPrivileges UserPrivilege[]
   menuActions    MenuAction[]
+
+  @@unique([path, method])
 }
 
 model Role {
@@ -196,6 +198,7 @@ model Menu {
   id        String  @id @unique @default(uuid())
   icon      String?
   name      String
+  path      String?
   isDefault Boolean @default(false)
 
   createdAt       DateTime? @default(now())
