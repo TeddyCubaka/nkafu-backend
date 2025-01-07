@@ -1,98 +1,87 @@
-enum MenuIcon {
-  dashboard = 'dashboard',
-  sales = 'sales',
-  inventory = 'inventory',
-  customers = 'customers',
-  suppliers = 'suppliers',
-  products = 'products',
-  invoices = 'invoices',
-  contracts = 'contracts',
-  payments = 'payments',
-  cashRegister = 'cashRegister',
-  savings = 'savings',
-  accounts = 'accounts',
-  audit = 'audit',
-  reports = 'reports',
-  fiscalPolicies = 'fiscalPolicies',
-  taxReturn = 'taxReturn',
-  logistics = 'logistics',
-  company = 'company',
-  compliance = 'compliance',
-  notifications = 'notifications',
-  userManagement = 'userManagement',
-  receipts = 'receipts',
-  transactions = 'transactions',
-  bank = 'bank',
-  taxManagement = 'taxManagement',
-  warehouse = 'warehouse',
-  budgets = 'budgets',
-  store = 'store',
-  priceTags = 'priceTags',
-  schedule = 'schedule',
-  reportsOverview = 'reportsOverview',
-  tasks = 'tasks',
-  searchFinance = 'searchFinance',
-  events = 'events',
-  policy = 'policy',
-  legal = 'legal',
-  orders = 'orders',
-  tags = 'tags',
-  user = 'user',
-  settings = 'settings',
-}
-const menuData = [
+import { Prisma, PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+type MenuType = Prisma.ActionPathMethodCompoundUniqueInput;
+//   | (Prisma.Without<Prisma.MenuCreateInput, Prisma.MenuUncheckedCreateInput> &
+//       Prisma.MenuUncheckedCreateInput)
+//   | (Prisma.Without<Prisma.MenuUncheckedCreateInput, Prisma.MenuCreateInput> &
+//       Prisma.MenuCreateInput);
+
+const menuData: {
+  icon: string;
+  name: string;
+  path?: string;
+  actions: string[];
+}[] = [
   {
-    Icon: MenuIcon.dashboard,
+    icon: 'dashboard',
     name: 'tableau de bord',
     path: '/',
     actions: [],
   },
   {
-    Icon: MenuIcon.settings,
+    icon: 'settings',
     name: 'settings',
     actions: [
-      {
-        Icon: null,
-        name: 'Menus',
-        path: '/list/core/menu',
-        actions: [],
-      },
-      {
-        Icon: null,
-        name: 'permissions',
-        path: '/list/core/action',
-        actions: [],
-      },
-      {
-        Icon: null,
-        name: 'roles',
-        path: '/list/core/role',
-        actions: [],
-      },
-      {
-        Icon: null,
-        name: 'utilisateurs',
-        path: '/list/core/user',
-        actions: [],
-      },
+      '/list/core/menu',
+      '/list/core/action',
+      '/list/core/role',
+      '/list/core/user',
     ],
   },
   {
-    Icon: MenuIcon.user,
+    icon: 'user',
     name: 'profile',
-    actions: [
-      {
-        Icon: null,
-        name: 'change le mot de passe',
-        path: '/change/auth/password',
-        actions: [],
-      },
-      {
-        Icon: null,
-        name: 'se deconnecter',
-        path: '/auth/login',
-        actions: [],
-      },
-    ],
+    actions: ['/change/auth/password', '/auth/logout'],
   },
 ];
+
+async function Saver() {
+  const menus = [];
+  for (const menu of menuData) {
+    let savedMenu = await prisma.menu
+      .upsert({
+        where: { name: menu.name },
+        update: {
+          icon: menu.icon,
+          name: menu.name,
+          path: menu.path,
+        },
+        create: {
+          icon: menu.icon,
+          name: menu.name,
+          path: menu.path,
+        },
+      })
+      .then((data) => data)
+      .catch((err) => null);
+    if (savedMenu == null) return;
+    await prisma.menuAction.deleteMany({ where: { menuId: savedMenu.id } });
+    const actions = menu.actions.map(async (path) => {
+      const action = await prisma.action.upsert({
+        where: {
+          path_method: {
+            path: path,
+            method: 'GET',
+          },
+        },
+        update: {},
+        create: {
+          name: `can view ${path.split('/')[path.split('/').length - 1]}`,
+          path: path,
+          method: 'GET',
+        },
+      });
+      return await prisma.menuAction.create({
+        data: {
+          menu: { connect: { id: savedMenu.id } },
+          action: { connect: { id: action.id } },
+        },
+      });
+    });
+    menus.push({ ...savedMenu, actions: actions });
+  }
+}
+
+Saver();
