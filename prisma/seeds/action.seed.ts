@@ -3,25 +3,25 @@ const prisma = new PrismaClient();
 
 const endponts = {
   core: [
-    'User',
-    'UserDevice',
-    'Organization',
-    'Action',
-    'Role',
-    'RoleAction',
-    'UserPrivilege',
-    'Menu',
-    'MenuAction',
-    'Entity',
-    'Agent',
-    'Currency',
-    'Wallet',
-    'Recipe',
-    'TaxPayerType',
-    'TaxPayer',
-    'Possession',
-    'Operation',
-    'Transaction',
+    'user',
+    'userDevice',
+    'organization',
+    'action',
+    'role',
+    'roleAction',
+    'userPrivilege',
+    'menu',
+    'menuAction',
+    'entity',
+    'agent',
+    'currency',
+    'wallet',
+    'recipe',
+    'taxPayerType',
+    'taxPayer',
+    'possession',
+    'operation',
+    'transaction',
   ],
 };
 
@@ -29,10 +29,10 @@ const methods: {
   method: string;
   verbose: string;
 }[] = [
-  { method: 'GET', verbose: 'see' },
-  { method: 'POST', verbose: 'create' },
-  { method: 'PATCH', verbose: 'change' },
-  { method: 'DELETE', verbose: 'delete' },
+  { method: 'GET', verbose: '' },
+  { method: 'POST', verbose: 'create a' },
+  { method: 'PATCH', verbose: 'change a' },
+  { method: 'DELETE', verbose: 'delete a' },
 ];
 
 async function saver() {
@@ -40,11 +40,11 @@ async function saver() {
     endponts[app].map(async (model) => {
       for (let method of methods) {
         const path = await prisma.action.upsert({
-          where: { name: `can ${method.verbose} ${model}` },
+          where: { name: `${method.verbose} ${model}` },
           update: {},
           create: {
             method: method.method,
-            name: `can ${method.verbose} ${model}`,
+            name: `${method.verbose} ${model}`,
             path: `/${app}/${model}`,
           },
         });

@@ -198,9 +198,6 @@ export class CoreController {
 
     return res.status(data.code).json({
       ...data,
-      // meta: {
-      //   listColumns: _model.listColumns,
-      // },
     });
   }
 
@@ -325,5 +322,9 @@ export class CoreController {
       message: 'formullaire trouvé',
       data: action == 'create' ? _model.createForm : _model.updateForm,
     });
+  }
+  @Get('load/menu')
+  loadMenu() {
+    return this.coreService.loadMenu();
   }
 }

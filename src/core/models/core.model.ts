@@ -149,6 +149,7 @@ export class Menu extends BaseModel<'menu'> {
 
   listColumns: ColumnType[] = [
     { proprety: 'icon', verbose: 'icone' },
+    { proprety: 'isDefault', verbose: 'ajouté par default' },
     { proprety: 'name', verbose: 'nom' },
   ];
 

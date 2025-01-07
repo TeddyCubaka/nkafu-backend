@@ -38,11 +38,13 @@ async function Saver() {
       .upsert({
         where: { name: menu.name },
         update: {
+          isDefault: true,
           icon: menu.icon,
           name: menu.name,
           path: menu.path,
         },
         create: {
+          isDefault: true,
           icon: menu.icon,
           name: menu.name,
           path: menu.path,
@@ -53,20 +55,29 @@ async function Saver() {
     if (savedMenu == null) return;
     await prisma.menuAction.deleteMany({ where: { menuId: savedMenu.id } });
     const actions = menu.actions.map(async (path) => {
-      const action = await prisma.action.upsert({
+      let action = await prisma.action.findUnique({
         where: {
-          path_method: {
+          name: `${path.split('/')[path.split('/').length - 1]}`,
+        },
+      });
+      if (action == null) {
+        action = await prisma.action.upsert({
+          where: {
+            path_method: {
+              path: path,
+              method: 'GET',
+            },
+          },
+          update: {
+            name: `${path.split('/')[path.split('/').length - 1]}`,
+          },
+          create: {
+            name: `${path.split('/')[path.split('/').length - 1]}`,
             path: path,
             method: 'GET',
           },
-        },
-        update: {},
-        create: {
-          name: `can view ${path.split('/')[path.split('/').length - 1]}`,
-          path: path,
-          method: 'GET',
-        },
-      });
+        });
+      }
       return await prisma.menuAction.create({
         data: {
           menu: { connect: { id: savedMenu.id } },
