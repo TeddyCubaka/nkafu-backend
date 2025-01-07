@@ -2,12 +2,6 @@ import { Prisma, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-type MenuType = Prisma.ActionPathMethodCompoundUniqueInput;
-//   | (Prisma.Without<Prisma.MenuCreateInput, Prisma.MenuUncheckedCreateInput> &
-//       Prisma.MenuUncheckedCreateInput)
-//   | (Prisma.Without<Prisma.MenuUncheckedCreateInput, Prisma.MenuCreateInput> &
-//       Prisma.MenuCreateInput);
-
 const menuData: {
   icon: string;
   name: string;
