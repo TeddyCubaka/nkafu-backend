@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { SignupBodyInterface } from './interfaces/signup-payload';
 import { prisma } from 'src/lib/prisma';
 import { Utils } from 'src/utils/utils';
+import { UserConnectionLog } from 'src/utils/userConnectionLogs';
 
 @Injectable()
 export class AuthService {
@@ -85,21 +86,46 @@ export class AuthService {
   }
 
   async validateUser(identifier: string, password: string) {
-    const user = await prisma.user.findFirst({
+    let user = await prisma.user.findFirst({
       where: {
         OR: [{ mobile: identifier }, { name: identifier }],
         isActive: true,
         isDeleted: false,
       },
-      include: {
-        userDevices: true,
-        agent: {
-          include: { wallets: { include: { currency: true } } },
-        },
-      },
     });
 
     if (user && (await await bcrypt.compare(password, user.password))) {
+      const today = new Date();
+      const currentYear = today.getFullYear().toString();
+      const currentMonth = (today.getMonth() + 1).toString(); // Mois de 1 à 12
+      const currentDate = today.toLocaleDateString();
+
+      let logs = user.meta['logs'] || {};
+      if (!logs[currentYear]) {
+        logs[currentYear] = {};
+      }
+      if (!logs[currentYear][currentMonth]) {
+        logs[currentYear][currentMonth] = [];
+      }
+      if (!logs[currentYear][currentMonth].includes(currentDate)) {
+        logs[currentYear][currentMonth].push(currentDate);
+      }
+
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          meta: { logs },
+        },
+        include: {
+          userDevices: true,
+          agent: {
+            include: {
+              wallets: { include: { currency: true } },
+              organization: true,
+            },
+          },
+        },
+      });
       const { password, ...result } = user;
       return {
         code: 200,

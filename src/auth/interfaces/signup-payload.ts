@@ -10,4 +10,6 @@ export interface SignupBodyInterface {
   mobile: string;
   password: string;
   allowedDeviceNumber: number | null;
+  mustRenewPassword?: boolean;
+  mail?: string;
 }

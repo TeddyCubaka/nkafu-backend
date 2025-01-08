@@ -14,7 +14,7 @@ export class Agent extends BaseModel<'agent'> {
     { proprety: 'mobile', verbose: 'téléphone' },
     { proprety: 'address', verbose: 'adresse' },
     { proprety: 'wallets', verbose: 'porte-feuilles' },
-    { proprety: 'organization', verbose: 'organisation' },
+    { proprety: 'organization.name', verbose: 'organisation' },
   ];
   createForm: InputType[] = [
     { proprety: 'firstName', verbose: 'nom', type: 'text' },
@@ -22,6 +22,12 @@ export class Agent extends BaseModel<'agent'> {
     { proprety: 'lastName', verbose: 'prenom', type: 'text' },
     { proprety: 'mobile', verbose: 'téléphone', type: 'text' },
     { proprety: 'address', verbose: 'adresse', type: 'text' },
+    {
+      proprety: 'organizationId',
+      verbose: 'organisation',
+      type: 'select',
+      endpoint: 'autocomplete/core/organization',
+    },
   ];
 
   updateForm: InputType[] = [...this.createForm];
@@ -51,6 +57,8 @@ export class Agent extends BaseModel<'agent'> {
         mobile: data?.mobile || null,
         name: `${data?.firstName}-${data.id}` || null,
         password: 'password12345',
+        mustRenewPassword: true,
+        mail: data.mail,
       });
       if ('data' in createdUser) {
         await this.prisma.agent.update({
@@ -144,6 +152,21 @@ export class Agent extends BaseModel<'agent'> {
       ...data,
     };
   };
+
+  async find(query?: any): Promise<any | null> {
+    query.where = { ...query['where'], isDeleted: false };
+    query.include = {
+      ...query['include'],
+      wallets: { include: { currency: true } },
+      user: true,
+      organization: true,
+    };
+    return await this.postFindOne(
+      await this.model.findMany({
+        ...query,
+      }),
+    );
+  }
 
   async findById(id: number | string, query?: any): Promise<any | null> {
     query.where = { ...query['where'], id: id, isDeleted: false };
