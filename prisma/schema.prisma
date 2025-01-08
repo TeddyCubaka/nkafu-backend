@@ -114,6 +114,7 @@ model Organization {
   createdBy  User?       @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
   updatedBy  User?       @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
   operations Operation[]
+  Agent      Agent[]
 }
 
 model Action {
@@ -263,11 +264,15 @@ model Entity {
 }
 
 model Agent {
-  id       String @id @unique @default(uuid())
-  fullName String @unique
-  mobile   String
-  address  String
-  userId   String @unique
+  id             String  @id @unique @default(uuid())
+  firstName      String
+  middleName     String?
+  lastName       String
+  mobile         String  @unique
+  mail           String? @unique
+  address        String
+  organizationId String?
+  userId         String? @unique
 
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt
@@ -279,7 +284,9 @@ model Agent {
   createdBy User? @relation("Agent-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Agent-updatedBy", fields: [updatedByUserId], references: [id])
 
-  user                   User        @relation("agent-account", fields: [userId], references: [id])
+  user         User?         @relation("agent-account", fields: [userId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
   wallets                Wallet[]
   operationInitializated Operation[] @relation("operation-initByAgent")
   operationClosed        Operation[] @relation("operation-closedByAgent")
