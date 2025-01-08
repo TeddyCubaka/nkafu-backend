@@ -295,8 +295,8 @@ model Agent {
 model Currency {
   id           String @id @unique @default(uuid())
   name         String
-  symbol       String
-  formatKey    String
+  symbol       String @unique
+  formatKey    String @unique
   exchangeRate Int
 
   createdAt       DateTime? @default(now())

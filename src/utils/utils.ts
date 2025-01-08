@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
 import { SignupBodyInterface } from 'src/auth/interfaces/signup-payload';
 import { prisma } from 'src/lib/prisma';
+import { formatPrismaError } from './format-prisma-error';
 const userAgent = require('user-agent');
 
 export class Utils {
@@ -110,7 +111,7 @@ export class Utils {
       .catch((error) => ({
         code: 400,
         message: "une erreur s'est produite",
-        error: error.message,
+        error: formatPrismaError(error) as any,
       }));
 
     return savedUser;

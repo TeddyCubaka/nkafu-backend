@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { CoreService } from './core.service';
 import { Request, Response } from 'express';
-import * as config from './models/core.model';
+import { coreConfig as config } from './models/core.model';
 import { QueriesUtils } from 'src/utils/query-to-prisma-params';
 import { formatPrismaError } from 'src/utils/format-prisma-error';
 import { validateForm } from 'src/utils/validate-form';
