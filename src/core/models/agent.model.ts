@@ -31,7 +31,7 @@ export class Agent extends BaseModel<'agent'> {
     value: string;
   }[] = (currency) => {
     return currency.map((line) => ({
-      label: `${line.name}`,
+      label: `${line.firstName}-${line.lastName}`,
       value: line.id,
     }));
   };
