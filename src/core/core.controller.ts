@@ -126,7 +126,6 @@ export class CoreController {
         code: 200,
         message: `la création a réussie`,
         data,
-        _queries,
       }))
       .catch((error: any) => {
         const formatedError = formatPrismaError(error);
@@ -142,9 +141,9 @@ export class CoreController {
 
     return res.status(data.code).json({
       ...data,
-      meta: {
-        listColumns: _model.listColumns,
-      },
+      // meta: {
+      //   listColumns: _model.listColumns,
+      // },
     });
   }
 
@@ -323,6 +322,7 @@ export class CoreController {
       data: action == 'create' ? _model.createForm : _model.updateForm,
     });
   }
+
   @Get('load/menu')
   loadMenu() {
     return this.coreService.loadMenu();

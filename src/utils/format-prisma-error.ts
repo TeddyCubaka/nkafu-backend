@@ -140,5 +140,9 @@ export function formatPrismaError(error: PrismaError): FormattedError {
       break;
   }
 
-  return { ...formattedError, meta: { errorMessage: error.message } };
+  return {
+    ...formattedError,
+    meta: { errorMessage: error.message, error_code: error.meta},
+
+  };
 }

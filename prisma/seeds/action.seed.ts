@@ -35,17 +35,33 @@ const methods: {
   { method: 'DELETE', verbose: 'delete a' },
 ];
 
+export const getAction = (method: string): string => {
+  switch (method) {
+    case 'GET':
+      return 'list';
+    case 'POST':
+      return 'create';
+    case 'PATCH':
+      return 'change';
+    case 'DELETE':
+      return 'delete';
+  }
+};
 async function saver() {
   for (let app in endponts) {
     endponts[app].map(async (model) => {
       for (let method of methods) {
         const path = await prisma.action.upsert({
           where: { name: `${method.verbose} ${model}` },
-          update: {},
+          update: {
+            method: method.method,
+            name: `${method.verbose} ${model}`,
+            path: `/${getAction(method.method)}/${app}/${model}`,
+          },
           create: {
             method: method.method,
             name: `${method.verbose} ${model}`,
-            path: `/${app}/${model}`,
+            path: `/${getAction(method.method)}/${app}/${model}`,
           },
         });
         console.log(path.name);

@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
+import { SignupBodyInterface } from 'src/auth/interfaces/signup-payload';
 import { prisma } from 'src/lib/prisma';
 const userAgent = require('user-agent');
 
@@ -61,7 +62,6 @@ export class Utils {
       version: agent.version,
       fullName: agent.fullName,
       os: agent.os,
-      
     };
   }
 
@@ -69,17 +69,50 @@ export class Utils {
     return `${data.name}-${data.version}-${data.os}`;
   }
 
-  async registerDevice(userId, req) {
-    // const deviceInfo = this.getDeviceInfo(req); // Fonction vue plus haut
-    // const newDevice = await prisma.userDevice.create({
-    //   data: {
-    //     userId: userId,
-    //     deviceType: deviceInfo.device,
-    //     os: deviceInfo.os,
-    //     browser: deviceInfo.browser,
-    //     ip: req.ip,
-    //   },
-    // });
-    // return newDevice.id;
+  async createUser(user: SignupBodyInterface) {
+    let verifyUser = await prisma.user.findFirst({
+      where: { mobile: user.mobile },
+    });
+
+    if (verifyUser !== null)
+      return {
+        code: 400,
+        message: 'ce numero de telephone est deja utilisé',
+      };
+
+    verifyUser = await prisma.user.findFirst({
+      where: { mobile: user.mobile },
+    });
+
+    if (verifyUser !== null)
+      return {
+        code: 400,
+        message: "ce nom d'utilisateur est deja prise",
+      };
+
+    const hashedPassword = await this.hashPassword(user.password);
+
+    const savedUser = await prisma.user
+      .create({
+        data: {
+          isActive: true,
+          mobile: user.mobile,
+          name: user.name,
+          password: hashedPassword,
+          roleId: null,
+        },
+      })
+      .then((data) => ({
+        code: 201,
+        message: 'compte créé avec succès',
+        data: data,
+      }))
+      .catch((error) => ({
+        code: 400,
+        message: "une erreur s'est produite",
+        error: error.message,
+      }));
+
+    return savedUser;
   }
 }

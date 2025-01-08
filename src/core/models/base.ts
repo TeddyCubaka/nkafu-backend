@@ -27,6 +27,11 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     async (data) => {
       return data;
     };
+
+  postCreateSave: (data: Record<string, any>) => Promise<Record<string, any>> =
+    async (data) => {
+      return data;
+    };
   preUpdateSave: (
     id: string,
     data: Record<string, any>,
@@ -56,10 +61,12 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async create(data: any, query?: any): Promise<any> {
     data = await this.preCreateSave(data);
-    return this.model.create({
+    const savedData = await this.model.create({
       data,
       ...query,
     });
+
+    return await this.postCreateSave(savedData);
   }
 
   async updateById(id: string, data: any, query?: any): Promise<any> {

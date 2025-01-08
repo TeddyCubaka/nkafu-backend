@@ -2,6 +2,7 @@ import { InputType } from 'src/types/models';
 import { BaseModel, ColumnType } from './base';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { Utils } from 'src/utils/utils';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export class Currency extends BaseModel<'currency'> {
   constructor() {
@@ -322,4 +323,112 @@ export class Role extends BaseModel<'role'> {
     data.roleActions = [...new Set(data.roleActions)];
     return data;
   }
+}
+
+export class Agent extends BaseModel<'agent'> {
+  constructor() {
+    super('agent');
+  }
+
+  listColumns: ColumnType[] = [
+    { proprety: 'firstName', verbose: 'nom' },
+    { proprety: 'middleName', verbose: 'postnom' },
+    { proprety: 'lastName', verbose: 'prenom' },
+    { proprety: 'mobile', verbose: 'téléphone' },
+    { proprety: 'address', verbose: 'adresse' },
+    { proprety: 'userId', verbose: 'ID utilisateur' },
+    { proprety: 'organization', verbose: 'organisation' },
+  ];
+  createForm: InputType[] = [
+    { proprety: 'firstName', verbose: 'nom', type: 'text' },
+    { proprety: 'middleName', verbose: 'postnom', type: 'text' },
+    { proprety: 'lastName', verbose: 'prenom', type: 'text' },
+    { proprety: 'mobile', verbose: 'téléphone', type: 'text' },
+    { proprety: 'address', verbose: 'adresse', type: 'text' },
+  ];
+
+  updateForm: InputType[] = [...this.createForm];
+
+  autocompleteData: (data: any[]) => {
+    label: string;
+    value: string;
+  }[] = (currency) => {
+    return currency.map((line) => ({
+      label: `${line.name}`,
+      value: line.id,
+    }));
+  };
+
+  preCreateSave = async (data: Record<string, any>) => {
+    return {
+      ...data,
+    };
+  };
+
+  postCreateSave = async (data) => {
+    let updatedData = { ...data };
+    try {
+      const utils = new Utils();
+      const createdUser = await utils.createUser({
+        allowedDeviceNumber: 1,
+        mobile: data?.mobile || null,
+        name: data?.firstName || null,
+        password: 'password12345',
+      });
+      if (createdUser.code > 399 || !('data' in createdUser)) {
+        await this.model.update({
+          where: { id: data.id },
+          data: {
+            meta: {
+              error: {
+                creation: [
+                  { reason: 'adding user account', error: createdUser },
+                ],
+              },
+            },
+          },
+        });
+        updatedData.meta = {
+          error: {
+            creation: [{ reason: 'adding user account', error: createdUser }],
+          },
+        };
+      } else {
+        await this.model.update({ data: { userId: createdUser.data.id } });
+        updatedData.meta = {
+          message: 'le compte user a été ajouté par defaut',
+        };
+      }
+    } catch (error) {
+      await this.model.update({
+        where: { id: data.id },
+        data: {
+          meta: {
+            error: {
+              creation: [
+                {
+                  reason: 'adding user account',
+                  error: { message: error.message, target: error?.target },
+                },
+              ],
+            },
+          },
+        },
+      });
+      updatedData.meta = {
+        error: {
+          creation: [{ reason: 'adding user account', error: error }],
+        },
+      };
+    }
+
+    return updatedData;
+  };
+
+  preUpdateSave = async (id: string, data: Record<string, any>) => {
+    await this.prisma.menuAction.deleteMany({ where: { menuId: id } });
+    return {
+      ...data,
+    };
+  };
 }
