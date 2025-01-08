@@ -13,7 +13,7 @@ export class Agent extends BaseModel<'agent'> {
     { proprety: 'lastName', verbose: 'prenom' },
     { proprety: 'mobile', verbose: 'téléphone' },
     { proprety: 'address', verbose: 'adresse' },
-    { proprety: 'userId', verbose: 'ID utilisateur' },
+    { proprety: 'wallets', verbose: 'porte-feuilles' },
     { proprety: 'organization', verbose: 'organisation' },
   ];
   createForm: InputType[] = [
@@ -144,4 +144,18 @@ export class Agent extends BaseModel<'agent'> {
       ...data,
     };
   };
+
+  async findById(id: number | string, query?: any): Promise<any | null> {
+    query.where = { ...query['where'], id: id, isDeleted: false };
+    query.include = {
+      ...query['include'],
+      wallets: { include: { currency: true } },
+      user: true,
+    };
+    return await this.postFindOne(
+      await this.model.findUnique({
+        ...query,
+      }),
+    );
+  }
 }
