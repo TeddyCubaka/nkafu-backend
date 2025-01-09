@@ -1,29 +1,32 @@
 import { InputType } from 'src/types/models';
 import { BaseModel, ColumnType } from './base';
 
-export class Organization extends BaseModel<'organization'> {
+export class TaxPayerType extends BaseModel<'taxPayerType'> {
   constructor() {
-    super('organization');
+    super('taxPayerType');
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'photo', verbose: 'photo' },
     { proprety: 'name', verbose: 'nom' },
-  ];
-  createForm: InputType[] = [
-    { proprety: 'name', verbose: 'name', type: 'text' },
-    { proprety: 'photo', verbose: 'photo', type: 'text' },
+    { proprety: 'isActive', verbose: 'activé' },
   ];
 
-  updateForm: InputType[] = [...this.createForm];
+  createForm: InputType[] = [
+    { proprety: 'name', verbose: 'nom', type: 'text' },
+    { proprety: 'isActive', verbose: 'activé', type: 'boolean' },
+  ];
+
+  updateForm: InputType[] = [
+    ...this.createForm.filter((field) => field.proprety != 'password'),
+  ];
 
   autocompleteData: (data: any[]) => {
     label: string;
     value: string;
   }[] = (currency) => {
     return currency.map((line) => ({
-      label: `${line.name}`,
       value: line.id,
+      label: `${line.name}`,
     }));
   };
 }

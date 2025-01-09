@@ -19,6 +19,8 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     value: string;
   }[];
 
+  defaultFindManyFilter: Record<string, any> = {};
+
   postFindOne: (data: Record<string, any>) => Promise<Record<string, any>> =
     async (data) => {
       return data;
@@ -45,6 +47,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   async find(query?: any) {
+    console.log(this.generateInclude())
     query.select = { ...query.select, ...this.generateInclude() };
     query.where = { ...query['where'], isDeleted: false };
     return this.model.findMany(query);

@@ -13,7 +13,7 @@ export class Agent extends BaseModel<'agent'> {
     { proprety: 'lastName', verbose: 'prenom' },
     { proprety: 'mobile', verbose: 'téléphone' },
     { proprety: 'address', verbose: 'adresse' },
-    { proprety: 'wallets', verbose: 'porte-feuilles' },
+    { proprety: 'wallets.solde', verbose: 'porte-feuilles' },
     { proprety: 'organization.name', verbose: 'organisation' },
   ];
   createForm: InputType[] = [
@@ -153,20 +153,20 @@ export class Agent extends BaseModel<'agent'> {
     };
   };
 
-  async find(query?: any): Promise<any | null> {
-    query.where = { ...query['where'], isDeleted: false };
-    query.include = {
-      ...query['include'],
-      wallets: { include: { currency: true } },
-      user: true,
-      organization: true,
-    };
-    return await this.postFindOne(
-      await this.model.findMany({
-        ...query,
-      }),
-    );
-  }
+  // async find(query?: any): Promise<any | null> {
+  //   query.where = { ...query['where'], isDeleted: false };
+  //   query.include = {
+  //     ...query['include'],
+  //     wallets: { include: { currency: true } },
+  //     user: true,
+  //     organization: true,
+  //   };
+  //   return await this.postFindOne(
+  //     await this.model.findMany({
+  //       ...query,
+  //     }),
+  //   );
+  // }
 
   async findById(id: number | string, query?: any): Promise<any | null> {
     query.where = { ...query['where'], id: id, isDeleted: false };
