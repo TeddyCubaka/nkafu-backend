@@ -63,8 +63,8 @@ export class QueriesUtils {
       where: {},
       select: {},
       include: {},
-      take: undefined,
-      skip: undefined,
+      take: 20,
+      skip: 1,
     };
 
     for (const [key, value] of Object.entries(queries)) {
