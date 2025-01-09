@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { DefaultArgs } from '@prisma/client/runtime/library';
 import { prisma } from 'prisma/lib/prisma';
 import { InputType } from 'src/types/models';
 
@@ -8,7 +9,11 @@ export type ColumnType = {
 };
 
 export abstract class BaseModel<T extends keyof PrismaClient> {
-  protected prisma;
+  protected prisma: PrismaClient<
+    Prisma.PrismaClientOptions,
+    never,
+    DefaultArgs
+  >;
   protected model;
 
   abstract listColumns: ColumnType[] | '*';
@@ -63,6 +68,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
 
   async create(data: any, query?: any): Promise<any> {
     data = await this.preCreateSave(data);
+    if (data.code && data.code > 399) return data;
     const savedData = await this.model.create({
       data,
       ...query,

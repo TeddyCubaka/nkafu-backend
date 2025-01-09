@@ -4,6 +4,7 @@ import { Agent } from './agent.model';
 import { Currency } from './currency.model';
 import { Entity } from './entity.model';
 import { Menu } from './menu.model';
+import { Operation } from './operation.model';
 import { Organization } from './organization.model';
 import { Possession } from './possession.model';
 import { Recipe } from './recipe.model';
@@ -26,4 +27,5 @@ export const coreConfig = {
   ActivitySector,
   Entity,
   Recipe,
+  Operation,
 };

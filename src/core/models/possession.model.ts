@@ -40,9 +40,9 @@ export class Possession extends BaseModel<'possession'> {
   autocompleteData: (data: any[]) => {
     label: string;
     value: string;
-  }[] = (currency) => {
-    return currency.map((line) => ({
-      label: `${line.name}`,
+  }[] = (data) => {
+    return data.map((line) => ({
+      label: `${line.uniqueNumber}`,
       value: line.id,
     }));
   };

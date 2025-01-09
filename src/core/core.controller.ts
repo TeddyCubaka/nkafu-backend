@@ -96,6 +96,7 @@ export class CoreController {
   async create(
     @Param('model') model: string,
     @Res() res: Response,
+    @Req() req: Request,
     @Query() query: { [key: string]: any },
     @Body() body: Record<string, any>,
   ) {
@@ -120,7 +121,7 @@ export class CoreController {
     }
 
     const data = await _model
-      .create(body, _queries)
+      .create({ ...body, createdByUserId: req.user['userId'] }, _queries)
       .then((data) => ({
         code: 200,
         message: `la création a réussie`,

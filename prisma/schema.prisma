@@ -264,7 +264,7 @@ model Entity {
   createdBy User? @relation("Entity-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Entity-updatedBy", fields: [updatedByUserId], references: [id])
 
-  parent    Entity?   @relation("entity-parent", references: [id], fields: [parentId])
+  parent    Entity?  @relation("entity-parent", references: [id], fields: [parentId])
   childrens Entity[] @relation("entity-parent")
   recipes   Recipe[]
 }
@@ -445,12 +445,12 @@ model Possession {
 }
 
 model Operation {
-  id              String @id @unique @default(uuid())
+  id              String  @id @unique @default(uuid())
   recipeId        String
   possessionId    String
   initByAgentId   String
   organizationId  String
-  closedByAgentId String
+  closedByAgentId String?
 
   status         OperationStatus
   paiementStatus PaiementStatus
@@ -474,7 +474,7 @@ model Operation {
   possession    Possession    @relation(fields: [possessionId], references: [id])
   initByAgent   Agent         @relation("operation-initByAgent", fields: [initByAgentId], references: [id])
   organization  Organization  @relation(fields: [organizationId], references: [id])
-  closedByAgent Agent         @relation("operation-closedByAgent", fields: [closedByAgentId], references: [id])
+  closedByAgent Agent?        @relation("operation-closedByAgent", fields: [closedByAgentId], references: [id])
   transactions  Transaction[]
 }
 
