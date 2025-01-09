@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { SignupBodyInterface } from './interfaces/signup-payload';
-import { prisma } from 'src/lib/prisma';
+import { prisma } from 'prisma/lib/prisma';
 import { Utils } from 'src/utils/utils';
 import { UserConnectionLog } from 'src/utils/userConnectionLogs';
 import { formatPrismaError } from 'src/utils/format-prisma-error';

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { prisma } from 'src/lib/prisma';
+import { prisma } from 'prisma/lib/prisma';
 import { InputType } from 'src/types/models';
 
 export type ColumnType = {

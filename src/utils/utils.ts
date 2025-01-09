@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
 import { SignupBodyInterface } from 'src/auth/interfaces/signup-payload';
-import { prisma } from 'src/lib/prisma';
+import { prisma } from 'prisma/lib/prisma';
 import { formatPrismaError } from './format-prisma-error';
 const userAgent = require('user-agent');
 
