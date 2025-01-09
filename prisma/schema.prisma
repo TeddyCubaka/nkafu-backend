@@ -50,41 +50,44 @@ model User {
   userPrivileges UserPrivilege[] @relation("User-Privilege")
   agent          Agent?          @relation("agent-account")
 
-  organizationsCreated  Organization[]  @relation("OrganizationCreatedBy")
-  organizationsUpdated  Organization[]  @relation("OrganizationupdatedBy")
-  actionsCreated        Action[]        @relation("Action-CreatedBy")
-  actionsUpdated        Action[]        @relation("Action-updatedBy")
-  rolesCreated          Role[]          @relation("Role-CreatedBy")
-  rolesUpdated          Role[]          @relation("Role-updatedBy")
-  roleActionsCreated    RoleAction[]    @relation("RoleAction-createdBy")
-  roleActionsUpdated    RoleAction[]    @relation("RoleAction-updatedBy")
-  userPrivilegesCreated UserPrivilege[] @relation("UserPrivilege-createdBy")
-  userPrivilegesUpdated UserPrivilege[] @relation("UserPrivilege-updatedBy")
-  menusCreated          Menu[]          @relation("Menu-createdBy")
-  menusUpdated          Menu[]          @relation("Menu-updatedBy")
-  menuActionsCreated    MenuAction[]    @relation("MenuAction-createdBy")
-  menuActionsUpdated    MenuAction[]    @relation("MenuAction-updatedBy")
-  entitiesCreated       Entity[]        @relation("Entity-createdBy")
-  entitiesUpdated       Entity[]        @relation("Entity-updatedBy")
-  agentCreated          Agent[]         @relation("Agent-createdBy")
-  agentUpdated          Agent[]         @relation("Agent-updatedBy")
-  currenciesCreated     Currency[]      @relation("Currency-createdBy")
-  currenciesUpdated     Currency[]      @relation("Currency-updatedBy")
-  walletCreated         Wallet[]        @relation("Wallet-createdBy")
-  walletUpdated         Wallet[]        @relation("Wallet-updatedBy")
-  recipesCreated        Recipe[]        @relation("Recipe-createdBy")
-  recipesUpdated        Recipe[]        @relation("Recipe-updatedBy")
-  taxPayersTypesCreated TaxPayerType[]  @relation("TaxPayerType-createdBy")
-  taxPayersTypesUpdated TaxPayerType[]  @relation("TaxPayerType-updatedBy")
-  taxPayersCreated      TaxPayer[]      @relation("TaxPayer-createdBy")
-  taxPayersUpdated      TaxPayer[]      @relation("TaxPayer-updatedBy")
-  possessionsCreated    Possession[]    @relation("Possession-createdBy")
-  possessionsUpdated    Possession[]    @relation("Possession-updatedBy")
-  operationsCreated     Operation[]     @relation("Operation-createdBy")
-  operationsUpdated     Operation[]     @relation("Operation-updatedBy")
-  transactionsCreated   Transaction[]   @relation("Operation-createdBy")
-  transactionsUpdated   Transaction[]   @relation("Operation-updatedBy")
-  userDevices           UserDevice[]
+  organizationsCreated      Organization[]      @relation("OrganizationCreatedBy")
+  organizationsUpdated      Organization[]      @relation("OrganizationupdatedBy")
+  actionsCreated            Action[]            @relation("Action-CreatedBy")
+  actionsUpdated            Action[]            @relation("Action-updatedBy")
+  rolesCreated              Role[]              @relation("Role-CreatedBy")
+  rolesUpdated              Role[]              @relation("Role-updatedBy")
+  roleActionsCreated        RoleAction[]        @relation("RoleAction-createdBy")
+  roleActionsUpdated        RoleAction[]        @relation("RoleAction-updatedBy")
+  userPrivilegesCreated     UserPrivilege[]     @relation("UserPrivilege-createdBy")
+  userPrivilegesUpdated     UserPrivilege[]     @relation("UserPrivilege-updatedBy")
+  menusCreated              Menu[]              @relation("Menu-createdBy")
+  menusUpdated              Menu[]              @relation("Menu-updatedBy")
+  menuActionsCreated        MenuAction[]        @relation("MenuAction-createdBy")
+  menuActionsUpdated        MenuAction[]        @relation("MenuAction-updatedBy")
+  entitiesCreated           Entity[]            @relation("Entity-createdBy")
+  entitiesUpdated           Entity[]            @relation("Entity-updatedBy")
+  agentCreated              Agent[]             @relation("Agent-createdBy")
+  agentUpdated              Agent[]             @relation("Agent-updatedBy")
+  currenciesCreated         Currency[]          @relation("Currency-createdBy")
+  currenciesUpdated         Currency[]          @relation("Currency-updatedBy")
+  walletCreated             Wallet[]            @relation("Wallet-createdBy")
+  walletUpdated             Wallet[]            @relation("Wallet-updatedBy")
+  recipesCreated            Recipe[]            @relation("Recipe-createdBy")
+  recipesUpdated            Recipe[]            @relation("Recipe-updatedBy")
+  taxPayersTypesCreated     TaxPayerType[]      @relation("TaxPayerType-createdBy")
+  taxPayersTypesUpdated     TaxPayerType[]      @relation("TaxPayerType-updatedBy")
+  taxPayersCreated          TaxPayer[]          @relation("TaxPayer-createdBy")
+  taxPayersUpdated          TaxPayer[]          @relation("TaxPayer-updatedBy")
+  possessionsCreated        Possession[]        @relation("Possession-createdBy")
+  possessionsUpdated        Possession[]        @relation("Possession-updatedBy")
+  operationsCreated         Operation[]         @relation("Operation-createdBy")
+  operationsUpdated         Operation[]         @relation("Operation-updatedBy")
+  transactionsCreated       Transaction[]       @relation("Operation-createdBy")
+  transactionsUpdated       Transaction[]       @relation("Operation-updatedBy")
+  walletLiquidationsCreated WalletLiquidation[] @relation("WalletLiquidation-createdBy")
+  walletLiquidationsUpdated WalletLiquidation[] @relation("WalletLiquidation-updatedBy")
+
+  userDevices UserDevice[]
 }
 
 model UserDevice {
@@ -365,9 +368,10 @@ model Recipe {
   createdBy User? @relation("Recipe-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Recipe-updatedBy", fields: [updatedByUserId], references: [id])
 
-  parent    Recipe      @relation("recipe-inner-relation", fields: [parentId], references: [id])
-  childrens Recipe[]    @relation("recipe-inner-relation")
-  operation Operation[]
+  parent         Recipe          @relation("recipe-inner-relation", fields: [parentId], references: [id])
+  childrens      Recipe[]        @relation("recipe-inner-relation")
+  operation      Operation[]
+  activitySector ActivitySector? @relation(fields: [activitySectorId], references: [id])
 }
 
 model TaxPayerType {
@@ -490,4 +494,42 @@ model Transaction {
 
   operation Operation @relation(fields: [operationId], references: [id])
   wallet    Wallet    @relation(fields: [walletId], references: [id])
+}
+
+model WalletLiquidation {
+  id                 String          @id @unique @default(uuid())
+  endAt              String
+  amount             Float
+  status             OperationStatus
+  startAt            String
+  AgentId            String
+  walletId           String
+  validatedByAgentId String?
+
+  meta            Json      @default("{}")
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  isDeleted       Boolean?  @default(false)
+  updatedByUserId String?
+  createdByUserId String?
+
+  createdBy User? @relation("WalletLiquidation-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("WalletLiquidation-updatedBy", fields: [updatedByUserId], references: [id])
+}
+
+model ActivitySector {
+  id          String @id @unique @default(uuid())
+  name        String @unique
+  description String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  updateBy  String?
+  createBy  String
+  isDeleted Boolean   @default(false)
+  meta      Json      @default("{}")
+
+  recipes Recipe[]
+
+  @@map("rfActivitySectors")
 }
