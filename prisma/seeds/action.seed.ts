@@ -22,6 +22,8 @@ const endponts = {
     'possession',
     'operation',
     'transaction',
+    'walletLiquidation',
+    'activitySector',
   ],
 };
 

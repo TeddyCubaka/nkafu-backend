@@ -86,6 +86,8 @@ model User {
   transactionsUpdated       Transaction[]       @relation("Operation-updatedBy")
   walletLiquidationsCreated WalletLiquidation[] @relation("WalletLiquidation-createdBy")
   walletLiquidationsUpdated WalletLiquidation[] @relation("WalletLiquidation-updatedBy")
+  activitySectorsCreated    ActivitySector[]    @relation("ActivitySector-createdBy")
+  activitySectorsUpdated    ActivitySector[]    @relation("ActivitySector-updatedBy")
 
   userDevices UserDevice[]
 }
@@ -522,12 +524,15 @@ model ActivitySector {
   name        String @unique
   description String
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  updateBy  String?
-  createBy  String
-  isDeleted Boolean   @default(false)
-  meta      Json      @default("{}")
+  meta            Json      @default("{}")
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  isDeleted       Boolean?  @default(false)
+  updatedByUserId String?
+  createdByUserId String?
+
+  createdBy User? @relation("ActivitySector-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("ActivitySector-updatedBy", fields: [updatedByUserId], references: [id])
 
   recipes Recipe[]
 
