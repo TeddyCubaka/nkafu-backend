@@ -5,6 +5,7 @@ import { SignupBodyInterface } from './interfaces/signup-payload';
 import { prisma } from 'src/lib/prisma';
 import { Utils } from 'src/utils/utils';
 import { UserConnectionLog } from 'src/utils/userConnectionLogs';
+import { formatPrismaError } from 'src/utils/format-prisma-error';
 
 @Injectable()
 export class AuthService {
@@ -94,7 +95,7 @@ export class AuthService {
       },
     });
 
-    if (user && (await await bcrypt.compare(password, user.password))) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       const today = new Date();
       const currentYear = today.getFullYear().toString();
       const currentMonth = (today.getMonth() + 1).toString(); // Mois de 1 à 12
@@ -139,20 +140,42 @@ export class AuthService {
     };
   }
 
-  async manageUserDevices(
-    user: {
-      id: string;
-      allowedDeviceNumber: Number;
-      userDevices: {
-        id: string;
-        createdAt: Date;
-        userId: string;
-        deviceType: string;
-        os: string;
-        browser: string;
-        ip: string;
-      }[];
-    },
-    userDevice,
-  ) {}
+  async changeUserPassword(data: {
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+    userId: string;
+  }) {
+    try {
+      let user = await prisma.user.findUnique({
+        where: { id: data.userId },
+        select: { password: true },
+      });
+
+      if ((await bcrypt.compare(data.currentPassword, user.password)) == false)
+        return {
+          code: 401,
+          message: 'votre mot de passe saisi est incorrect',
+        };
+
+      if (data.newPassword !== data.confirmNewPassword) {
+        return {
+          code: 400,
+          message: 'vos mots de passes ne correspondent pas',
+        };
+      }
+
+      user = await prisma.user.update({
+        where: { id: data.userId },
+        data: { password: await this.utils.hashPassword(data.newPassword) },
+      });
+
+      return {
+        code: 200,
+        message: 'votre mot de passe a été mis à jour avec succès',
+      };
+    } catch (error) {
+      return formatPrismaError(error) as any;
+    }
+  }
 }

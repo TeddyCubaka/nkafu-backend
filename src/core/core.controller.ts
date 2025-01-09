@@ -17,7 +17,6 @@ import { coreConfig as config } from './models/core.model';
 import { QueriesUtils } from 'src/utils/query-to-prisma-params';
 import { formatPrismaError } from 'src/utils/format-prisma-error';
 import { validateForm } from 'src/utils/validate-form';
-import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('')
