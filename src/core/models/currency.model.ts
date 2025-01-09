@@ -8,8 +8,8 @@ export class Currency extends BaseModel<'currency'> {
 
   listColumns: ColumnType[] = [
     { proprety: 'name', verbose: 'nom' },
+    { proprety: 'formatKey', verbose: 'abréviation' },
     { proprety: 'symbol', verbose: 'symbole' },
-    { proprety: 'formatproprety', verbose: 'abréviation' },
     { proprety: 'exchangeRate', verbose: 'taux de change' },
   ];
 
@@ -21,8 +21,6 @@ export class Currency extends BaseModel<'currency'> {
   ];
 
   updateForm: InputType[] = this.createForm;
-
-//   data = new PrismaClient().currency.findMany();
 
   autocompleteData: (data: any[]) => {
     label: string;

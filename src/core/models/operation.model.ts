@@ -1,9 +1,9 @@
 import { InputType } from 'src/types/models';
 import { BaseModel, ColumnType } from 'src/core/models/base';
 
-export class Action extends BaseModel<'action'> {
+export class Operation extends BaseModel<'operation'> {
   constructor() {
-    super('action');
+    super('operation');
   }
 
   listColumns: ColumnType[] = [

@@ -250,7 +250,7 @@ model Entity {
   name         String  @unique()
   description  String
   abbreviation String?
-  parentId     String
+  parentId     String?
 
   isActive Boolean? @default(true)
 
@@ -264,8 +264,9 @@ model Entity {
   createdBy User? @relation("Entity-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Entity-updatedBy", fields: [updatedByUserId], references: [id])
 
-  parent    Entity   @relation("entity-parent", references: [id], fields: [parentId])
+  parent    Entity?   @relation("entity-parent", references: [id], fields: [parentId])
   childrens Entity[] @relation("entity-parent")
+  recipes   Recipe[]
 }
 
 model Agent {
@@ -315,6 +316,7 @@ model Currency {
   updatedBy User? @relation("Currency-updatedBy", fields: [updatedByUserId], references: [id])
 
   wallets Wallet[]
+  recipes Recipe[]
 }
 
 model Wallet {
@@ -347,18 +349,18 @@ enum RecipeType {
 }
 
 model Recipe {
-  id             String     @id @unique @default(uuid())
-  name           String
-  pricing        Int
-  parentId       String
-  entityId       String?
-  currencyId     String?
-  description    String
-  typeRecipeId   RecipeType
-  generatingFact String?
-
+  id               String     @id @unique @default(uuid())
+  name             String
+  pricing          Int
+  parentId         String?
+  entityId         String?
+  currencyId       String?
+  description      String
+  recipeType       RecipeType
+  generatingFact   String?
   activitySectorId String?
-  isActive         Boolean @default(true)
+
+  isActive Boolean @default(true)
 
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt
@@ -370,10 +372,12 @@ model Recipe {
   createdBy User? @relation("Recipe-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Recipe-updatedBy", fields: [updatedByUserId], references: [id])
 
-  parent         Recipe          @relation("recipe-inner-relation", fields: [parentId], references: [id])
+  parent         Recipe?         @relation("recipe-inner-relation", fields: [parentId], references: [id])
   childrens      Recipe[]        @relation("recipe-inner-relation")
   operation      Operation[]
   activitySector ActivitySector? @relation(fields: [activitySectorId], references: [id])
+  currency       Currency?       @relation(fields: [currencyId], references: [id])
+  entity         Entity?         @relation(fields: [entityId], references: [id])
 }
 
 model TaxPayerType {
