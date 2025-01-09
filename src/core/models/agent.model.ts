@@ -23,6 +23,12 @@ export class Agent extends BaseModel<'agent'> {
     { proprety: 'mobile', verbose: 'téléphone', type: 'text' },
     { proprety: 'address', verbose: 'adresse', type: 'text' },
     {
+      proprety: 'agentBusStops',
+      verbose: "parkings d'affectation",
+      type: 'multi-select',
+      endpoint: 'autocomplete/core/busStop',
+    },
+    {
       proprety: 'organizationId',
       verbose: 'organisation',
       type: 'select',
@@ -31,7 +37,6 @@ export class Agent extends BaseModel<'agent'> {
   ];
 
   updateForm: InputType[] = [...this.createForm];
-
   autocompleteData: (data: any[]) => {
     label: string;
     value: string;
@@ -45,6 +50,11 @@ export class Agent extends BaseModel<'agent'> {
   preCreateSave = async (data: Record<string, any>) => {
     return {
       ...data,
+      agentBusStops: {
+        create: data.agentBusStops.map((element: string) => ({
+          busStopId: element,
+        })),
+      },
     };
   };
 
@@ -147,26 +157,16 @@ export class Agent extends BaseModel<'agent'> {
   };
 
   preUpdateSave = async (id: string, data: Record<string, any>) => {
-    await this.prisma.menuAction.deleteMany({ where: { menuId: id } });
+    await this.prisma.agentBusStop.deleteMany({ where: { agentId: id } });
     return {
       ...data,
+      agentBusStops: {
+        create: data.agentBusStops.map((element: string) => ({
+          busStopId: element,
+        })),
+      },
     };
   };
-
-  // async find(query?: any): Promise<any | null> {
-  //   query.where = { ...query['where'], isDeleted: false };
-  //   query.include = {
-  //     ...query['include'],
-  //     wallets: { include: { currency: true } },
-  //     user: true,
-  //     organization: true,
-  //   };
-  //   return await this.postFindOne(
-  //     await this.model.findMany({
-  //       ...query,
-  //     }),
-  //   );
-  // }
 
   async findById(id: number | string, query?: any): Promise<any | null> {
     query.where = { ...query['where'], id: id, isDeleted: false };
@@ -174,6 +174,7 @@ export class Agent extends BaseModel<'agent'> {
       ...query['include'],
       wallets: { include: { currency: true } },
       user: true,
+      agentBusStops: { include: { busStop: true } },
     };
     return await this.postFindOne(
       await this.model.findUnique({

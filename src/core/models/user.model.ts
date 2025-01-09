@@ -7,6 +7,10 @@ export class User extends BaseModel<'user'> {
     super('user');
   }
 
+  defaultFindByIdFilter = {
+    include: { userPrivileges: { include: { action: true } } },
+  };
+
   listColumns: ColumnType[] = [
     { proprety: 'name', verbose: 'nom' },
     { proprety: 'mail', verbose: 'adresse mail' },

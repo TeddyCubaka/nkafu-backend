@@ -92,6 +92,8 @@ model User {
   activitySectorsUpdated    ActivitySector[]    @relation("ActivitySector-updatedBy")
   BusStopCreated            BusStop[]           @relation("BusStop-createdBy")
   BusStopUpdated            BusStop[]           @relation("BusStop-updatedBy")
+  agentBusStopsCreated      AgentBusStop[]      @relation("AgentBusStop-createdBy")
+  agentBusStopsUpdated      AgentBusStop[]      @relation("AgentBusStop-updatedBy")
 }
 
 model UserDevice {
@@ -297,8 +299,9 @@ model Agent {
   organization Organization? @relation(fields: [organizationId], references: [id])
 
   wallets                Wallet[]
-  operationInitializated Operation[] @relation("operation-initByAgent")
-  operationClosed        Operation[] @relation("operation-closedByAgent")
+  operationInitializated Operation[]    @relation("operation-initByAgent")
+  operationClosed        Operation[]    @relation("operation-closedByAgent")
+  agentBusStops          AgentBusStop[]
 }
 
 model Currency {
@@ -561,5 +564,25 @@ model BusStop {
   createdBy User? @relation("BusStop-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("BusStop-updatedBy", fields: [updatedByUserId], references: [id])
 
-  entity Entity? @relation(fields: [entityId], references: [id])
+  entity        Entity?        @relation(fields: [entityId], references: [id])
+  agentBusStops AgentBusStop[]
+}
+
+model AgentBusStop {
+  id        String @id @unique @default(uuid())
+  agentId   String
+  busStopId String
+
+  meta            Json      @default("{}")
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  isDeleted       Boolean?  @default(false)
+  updatedByUserId String?
+  createdByUserId String?
+
+  createdBy User? @relation("AgentBusStop-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("AgentBusStop-updatedBy", fields: [updatedByUserId], references: [id])
+
+  agent   Agent   @relation(fields: [agentId], references: [id])
+  busStop BusStop @relation(fields: [busStopId], references: [id])
 }

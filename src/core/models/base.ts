@@ -25,6 +25,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }[];
 
   defaultFindManyFilter: Record<string, any> = {};
+  defaultFindByIdFilter: Record<string, any> = {};
 
   postFindOne: (data: Record<string, any>) => Promise<Record<string, any>> =
     async (data) => {
@@ -62,11 +63,13 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     return await this.postFindOne(
       await this.model.findUnique({
         ...query,
+        ...this.defaultFindByIdFilter,
       }),
     );
   }
 
   async create(data: any, query?: any): Promise<any> {
+    delete query['where'];
     data = await this.preCreateSave(data);
     if (data.code && data.code > 399) return data;
     const savedData = await this.model.create({
@@ -80,8 +83,6 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   async updateById(id: string, data: any, query?: any): Promise<any> {
     query.where = { ...query['where'], id: id };
     data = await this.preUpdateSave(id, data);
-
-    console.log(data);
 
     return this.model.update({
       ...query,
