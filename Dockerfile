@@ -21,8 +21,6 @@ RUN yarn prisma generate
 
 RUN yarn prisma migrate deploy
 
-RUN yarn load-menus
-
 RUN yarn build
 
 EXPOSE 4000
