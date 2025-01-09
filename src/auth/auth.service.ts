@@ -125,6 +125,7 @@ export class AuthService {
               organization: true,
             },
           },
+          role: true,
         },
       });
       const { password, ...result } = user;

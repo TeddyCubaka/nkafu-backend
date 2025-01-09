@@ -50,6 +50,8 @@ model User {
   userPrivileges UserPrivilege[] @relation("User-Privilege")
   agent          Agent?          @relation("agent-account")
 
+  userDevices UserDevice[]
+
   organizationsCreated      Organization[]      @relation("OrganizationCreatedBy")
   organizationsUpdated      Organization[]      @relation("OrganizationupdatedBy")
   actionsCreated            Action[]            @relation("Action-CreatedBy")
@@ -88,8 +90,8 @@ model User {
   walletLiquidationsUpdated WalletLiquidation[] @relation("WalletLiquidation-updatedBy")
   activitySectorsCreated    ActivitySector[]    @relation("ActivitySector-createdBy")
   activitySectorsUpdated    ActivitySector[]    @relation("ActivitySector-updatedBy")
-
-  userDevices UserDevice[]
+  BusStopCreated            BusStop[]           @relation("BusStop-createdBy")
+  BusStopUpdated            BusStop[]           @relation("BusStop-updatedBy")
 }
 
 model UserDevice {
@@ -264,9 +266,10 @@ model Entity {
   createdBy User? @relation("Entity-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Entity-updatedBy", fields: [updatedByUserId], references: [id])
 
-  parent    Entity?  @relation("entity-parent", references: [id], fields: [parentId])
-  childrens Entity[] @relation("entity-parent")
+  parent    Entity?   @relation("entity-parent", references: [id], fields: [parentId])
+  childrens Entity[]  @relation("entity-parent")
   recipes   Recipe[]
+  busStops  BusStop[]
 }
 
 model Agent {
@@ -541,4 +544,22 @@ model ActivitySector {
   recipes Recipe[]
 
   @@map("rfActivitySectors")
+}
+
+model BusStop {
+  id       String @id @unique @default(uuid())
+  name     String @unique
+  entityId String
+
+  meta            Json      @default("{}")
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  isDeleted       Boolean?  @default(false)
+  updatedByUserId String?
+  createdByUserId String?
+
+  createdBy User? @relation("BusStop-createdBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("BusStop-updatedBy", fields: [updatedByUserId], references: [id])
+
+  entity Entity? @relation(fields: [entityId], references: [id])
 }

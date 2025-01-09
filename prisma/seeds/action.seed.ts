@@ -24,6 +24,7 @@ const endponts = {
     'transaction',
     'walletLiquidation',
     'activitySector',
+    'busStop',
   ],
 };
 

@@ -1,6 +1,7 @@
 import { Action } from './action.model';
 import { ActivitySector } from './activitySector.model';
 import { Agent } from './agent.model';
+import { BusStop } from './busStop.model';
 import { Currency } from './currency.model';
 import { Entity } from './entity.model';
 import { Menu } from './menu.model';
@@ -28,4 +29,5 @@ export const coreConfig = {
   Entity,
   Recipe,
   Operation,
+  BusStop,
 };
