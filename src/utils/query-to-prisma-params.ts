@@ -20,7 +20,7 @@ export class QueriesUtils {
   private castValue(value: ValueType): ValueType {
     if (typeof value === 'string') {
       if (value === '') return '';
-      if (!isNaN(+value)) return Number(value);
+      // if (!isNaN(+value)) return Number(value);
       if (value === 'true') return true;
       if (value === 'false') return false;
       if (value === 'null') return null;
@@ -60,9 +60,9 @@ export class QueriesUtils {
 
   public toPrismaFilterMap(queries: Record<string, any>): PrismaFilter {
     const prismaFilters: PrismaFilter = {
-      where: undefined,
-      select: undefined,
-      include: undefined,
+      where: {},
+      select: {},
+      include: {},
       take: undefined,
       skip: undefined,
     };
