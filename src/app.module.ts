@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { CoreModule } from './core/core.module';
-import { OperationModule } from './operation/operation.module';
 
 @Module({
   imports: [
@@ -14,7 +13,6 @@ import { OperationModule } from './operation/operation.module';
     }),
     AuthModule,
     CoreModule,
-    OperationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
