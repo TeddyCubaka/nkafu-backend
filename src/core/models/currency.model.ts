@@ -16,7 +16,7 @@ export class Currency extends BaseModel<'currency'> {
   createForm: InputType[] = [
     { verbose: 'nom', proprety: 'name', type: 'text' },
     { verbose: 'symbole', proprety: 'symbol', type: 'text' },
-    { verbose: 'abréviation', proprety: 'formatproprety', type: 'text' },
+    { verbose: 'abréviation', proprety: 'formatKey', type: 'text' },
     { verbose: 'taux de change', proprety: 'exchangeRate', type: 'number' },
   ];
 
