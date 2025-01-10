@@ -59,11 +59,16 @@ async function saver() {
             ? `${method.verbose} permission`
             : `${method.verbose} ${model}`;
         const path = await prisma.action.upsert({
-          where: { name: name },
+          where: {
+            path_method: {
+              method: method.method,
+              path: `/${getAction(method.method)}/${app}/${model}`,
+            },
+          },
           update: {
-            // method: method.method,
-            // name: name,
-            // path: `/${getAction(method.method)}/${app}/${model}`,
+            method: method.method,
+            name: name,
+            path: `/${getAction(method.method)}/${app}/${model}`,
           },
           create: {
             method: method.method,
