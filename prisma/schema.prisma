@@ -332,11 +332,11 @@ model Currency {
 
 model Wallet {
   id         String @id @unique @default(uuid())
-  solde      Float
+  solde      Float  @default(0)
   agentId    String
   currencyId String
 
-  canBeNegative Boolean
+  canBeNegative Boolean @default(false)
 
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt
