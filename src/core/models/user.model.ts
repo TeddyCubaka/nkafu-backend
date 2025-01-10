@@ -107,6 +107,11 @@ export class User extends BaseModel<'user'> {
   postFindOne: (data: Record<string, any>) => Promise<Record<string, any>> =
     async (data) => {
       delete data.password;
-      return data;
+      return {
+        ...data,
+        userPrivileges: data.userPrivileges.map(
+          (privillege) => privillege.actionId,
+        ),
+      };
     };
 }

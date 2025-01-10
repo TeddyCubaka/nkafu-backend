@@ -1,4 +1,5 @@
 import { Action } from './action.model';
+import { WalletLiquidation } from './walletLiquidation.model';
 import { ActivitySector } from './activitySector.model';
 import { Agent } from './agent.model';
 import { BusStop } from './busStop.model';
@@ -30,4 +31,5 @@ export const coreConfig = {
   Recipe,
   Operation,
   BusStop,
+  WalletLiquidation,
 };

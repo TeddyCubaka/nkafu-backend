@@ -168,6 +168,13 @@ export class Agent extends BaseModel<'agent'> {
     };
   };
 
+  postFindOne = async (data) => {
+    return {
+      ...data,
+      agentBusStops : data.agentBusStops.map(busStop => busStop.busStopId)
+    }
+  }
+
   async findById(id: number | string, query?: any): Promise<any | null> {
     query.where = { ...query['where'], id: id, isDeleted: false };
     query.include = {

@@ -49,8 +49,7 @@ model User {
 
   userPrivileges UserPrivilege[] @relation("User-Privilege")
   agent          Agent?          @relation("agent-account")
-
-  userDevices UserDevice[]
+  userDevices    UserDevice[]
 
   organizationsCreated      Organization[]      @relation("OrganizationCreatedBy")
   organizationsUpdated      Organization[]      @relation("OrganizationupdatedBy")
@@ -299,9 +298,11 @@ model Agent {
   organization Organization? @relation(fields: [organizationId], references: [id])
 
   wallets                Wallet[]
-  operationInitializated Operation[]    @relation("operation-initByAgent")
-  operationClosed        Operation[]    @relation("operation-closedByAgent")
+  operationInitializated Operation[]         @relation("operation-initByAgent")
+  operationClosed        Operation[]         @relation("operation-closedByAgent")
   agentBusStops          AgentBusStop[]
+  liquidations           WalletLiquidation[] @relation("AgentId-agent")
+  validatedLiquidations  WalletLiquidation[] @relation("validatedByAgentId-agent")
 }
 
 model Currency {
@@ -343,9 +344,10 @@ model Wallet {
   createdBy User? @relation("Wallet-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Wallet-updatedBy", fields: [updatedByUserId], references: [id])
 
-  agent        Agent         @relation(fields: [agentId], references: [id])
-  currency     Currency      @relation(fields: [currencyId], references: [id])
-  transactions Transaction[]
+  agent              Agent               @relation(fields: [agentId], references: [id])
+  currency           Currency            @relation(fields: [currencyId], references: [id])
+  transactions       Transaction[]
+  walletLiquidations WalletLiquidation[]
 }
 
 enum RecipeType {
@@ -514,7 +516,7 @@ model WalletLiquidation {
   amount             Float
   status             OperationStatus
   startAt            String
-  AgentId            String
+  agentId            String
   walletId           String
   validatedByAgentId String?
 
@@ -527,6 +529,10 @@ model WalletLiquidation {
 
   createdBy User? @relation("WalletLiquidation-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("WalletLiquidation-updatedBy", fields: [updatedByUserId], references: [id])
+
+  agent            Agent  @relation("AgentId-agent", fields: [agentId], references: [id])
+  validatedByAgent Agent? @relation("validatedByAgentId-agent", fields: [validatedByAgentId], references: [id])
+  wallet           Wallet @relation(fields: [walletId], references: [id])
 }
 
 model ActivitySector {
