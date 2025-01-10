@@ -3,10 +3,10 @@ const prisma = new PrismaClient();
 
 const endponts = {
   core: [
+    'action',
     'user',
     'userDevice',
     'organization',
-    'action',
     'role',
     'roleAction',
     'userPrivilege',
@@ -54,16 +54,20 @@ async function saver() {
   for (let app in endponts) {
     endponts[app].map(async (model) => {
       for (let method of methods) {
+        let name =
+          model == 'action'
+            ? `${method.verbose} permission`
+            : `${method.verbose} ${model}`;
         const path = await prisma.action.upsert({
-          where: { name: `${method.verbose} ${model}` },
+          where: { name: name },
           update: {
-            method: method.method,
-            name: `${method.verbose} ${model}`,
-            path: `/${getAction(method.method)}/${app}/${model}`,
+            // method: method.method,
+            // name: name,
+            // path: `/${getAction(method.method)}/${app}/${model}`,
           },
           create: {
             method: method.method,
-            name: `${method.verbose} ${model}`,
+            name: name,
             path: `/${getAction(method.method)}/${app}/${model}`,
           },
         });
