@@ -47,6 +47,13 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     return data;
   };
 
+  postUpdateSave: (
+    id: string,
+    data: Record<string, any>,
+  ) => Promise<Record<string, any>> = async (id, data) => {
+    return data;
+  };
+
   constructor(model: string) {
     this.prisma = prisma;
     this.model = this.prisma[model];
@@ -84,10 +91,12 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     query.where = { ...query['where'], id: id };
     data = await this.preUpdateSave(id, data);
 
-    return this.model.update({
+    const savedData = await this.model.update({
       ...query,
       data,
     });
+
+    return this.postUpdateSave(id, savedData);
   }
 
   async deleteById(id: number | string, query?: any): Promise<any> {

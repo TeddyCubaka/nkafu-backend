@@ -1,5 +1,7 @@
 import { InputType } from 'src/types/models';
 import { BaseModel, ColumnType } from './base';
+import { Prisma } from '@prisma/client';
+import { formatPrismaError } from 'src/utils/format-prisma-error';
 
 export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
   constructor() {
@@ -16,10 +18,28 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
     { proprety: 'validatedByAgent.firstName', verbose: 'clôoturé par' },
   ];
   createForm: InputType[] = [
-    { proprety: 'Voulez', verbose: 'name', type: 'text' },
+    {
+      proprety: 'confirmation',
+      verbose: 'Voulez-vous faire une liquidation ?',
+      type: 'select',
+      options: [
+        { label: 'OUI', value: 'true' },
+        { label: 'NON', value: 'false' },
+      ],
+    },
   ];
 
-  updateForm: InputType[] = [...this.createForm];
+  updateForm: InputType[] = [
+    {
+      proprety: 'confirmation',
+      verbose: 'Valider la liquidation ?',
+      type: 'select',
+      options: [
+        { label: 'OUI', value: 'true' },
+        { label: 'NON', value: 'false' },
+      ],
+    },
+  ];
 
   autocompleteData: (data: any[]) => {
     label: string;
@@ -29,5 +49,181 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
       label: `${line.name}`,
       value: line.id,
     }));
+  };
+
+  preCreateSave: (
+    data: Record<string, any>,
+  ) => Promise<
+    Prisma.XOR<
+      Prisma.WalletLiquidationCreateInput,
+      Prisma.WalletLiquidationUncheckedCreateInput
+    >
+  > = async (data: {
+    confirmation: 'true' | 'false';
+    createdByUserId: string;
+  }) => {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: data.createdByUserId,
+        isDeleted: false,
+        agent: { isNot: null },
+      },
+      include: {
+        agent: {
+          include: {
+            wallets: true,
+            operationInitializated: {
+              where: {
+                isClosed: true,
+              },
+              orderBy: { createdAt: { sort: 'desc' } },
+            },
+            liquidations: {
+              where: { status: 'PENDING' },
+              orderBy: { createdAt: { sort: 'desc' } },
+            },
+          },
+        },
+      },
+    });
+
+    if (user == null) {
+      throw new Error("vous n'êtes pas eligible à cette fonctionnalité");
+    }
+
+    if (user.agent.wallets.length == 0) {
+      throw new Error("vous n'avez aucun porte-feuille à liquider");
+    }
+
+    if (user.agent.wallets[0].solde < 100) {
+      throw new Error('Votre balance est trop faible pour la liquidation');
+    }
+
+    if (user.agent.liquidations.length > 0) {
+      throw new Error(
+        'Vous avez une autre liquidation en attente. Attendez la validation',
+      );
+    }
+
+    let startAt = new Date().toISOString();
+    if (user.agent.operationInitializated.length > 0) {
+      startAt = new Date(
+        user.agent.operationInitializated[0].createdAt,
+      ).toISOString();
+    }
+
+    const status = data.confirmation == 'true' ? 'PENDING' : 'REJECTED';
+
+    return {
+      amount: user.agent.wallets[0].solde,
+      startAt,
+      endAt: '',
+      status: status,
+      agent: { connect: { id: user.agent.id } },
+      wallet: { connect: { id: user.agent.wallets[0].id } },
+      createdBy: { connect: { id: data.createdByUserId } },
+    };
+  };
+
+  preUpdateSave: (
+    id: string,
+    data: Record<string, any>,
+  ) => Promise<
+    Prisma.XOR<
+      Prisma.WalletLiquidationUpdateInput,
+      Prisma.WalletLiquidationUncheckedUpdateInput
+    >
+  > = async (
+    id: string,
+    data: {
+      confirmation: 'true' | 'false';
+      updatedByUserId: string;
+    },
+  ) => {
+    const liquidation = await this.prisma.walletLiquidation.findUniqueOrThrow({
+      where: { id },
+    });
+
+    if (liquidation.status !== 'PENDING') {
+      throw new Error('Cette liquidation est déjà validé');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: data.updatedByUserId,
+        isDeleted: false,
+        agent: { isNot: null },
+      },
+      include: {
+        agent: {
+          include: { wallets: true },
+        },
+      },
+    });
+
+    if (user == null) {
+      throw new Error("vous n'êtes pas eligible à cette fonctionnalité");
+    }
+
+    const status = data.confirmation == 'true' ? 'CLOSED' : 'REJECTED';
+    return {
+      updatedByUserId: data.updatedByUserId,
+      status: status,
+      endAt: new Date().toISOString(),
+      validatedByAgentId: user.agent.id,
+    };
+  };
+
+  postUpdateSave: (
+    id: string,
+    data: Record<string, any>,
+  ) => Promise<Record<string, any>> = async (id, data) => {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: data.createdByUserId,
+          isDeleted: false,
+          agent: { isNot: null },
+        },
+        include: {
+          agent: {
+            include: { wallets: true },
+          },
+        },
+      });
+      if (user == null) return data;
+      if (user.agent.wallets.length == 0) {
+        await this.prisma.walletLiquidation.update({
+          where: { id: id },
+          data: { status: 'REJECTED' },
+        });
+
+        throw new Error(
+          "L'agent qui a demandé cette liquidation n'a aucun portefeuille disponible",
+        );
+      }
+
+      // if (user.agent.wallets[0].solde < data.amount) {
+      // throw new Error("Le solde disponible de l'agent est inferieur à cette li");
+      // }
+      const newSolde =
+        Number(data.amout) - Number(user.agent.wallets[0].solde) || 0;
+      await this.prisma.wallet.update({
+        where: { id: user.agent.wallets[0].id },
+        data: {
+          solde: newSolde,
+        },
+      });
+
+      return data;
+    } catch (err) {
+      await this.prisma.walletLiquidation.update({
+        where: { id },
+        data: { status: 'REJECTED' },
+      });
+
+      const error = formatPrismaError(err);
+      return error;
+    }
   };
 }

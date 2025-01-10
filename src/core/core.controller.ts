@@ -155,6 +155,7 @@ export class CoreController {
     @Res() res: Response,
     @Query() query: { [key: string]: any },
     @Body() body: Record<string, any>,
+    @Req() req: Request,
   ) {
     const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
@@ -177,12 +178,19 @@ export class CoreController {
     }
 
     const data = await _model
-      .updateById(uuid, body, _queries)
-      .then((data) => ({
-        code: 200,
-        message: `mise à jour réussie`,
-        data,
-      }))
+      .updateById(
+        uuid,
+        { ...body, updatedByUserId: req.user['userId'] },
+        _queries,
+      )
+      .then((data) => {
+        if (data.code) return data;
+        return {
+          code: 200,
+          message: `mise à jour réussie`,
+          data,
+        };
+      })
       .catch((error: any) => {
         const formatedError = formatPrismaError(error);
         return {
@@ -222,11 +230,14 @@ export class CoreController {
     const _model = new config[modelName]();
     const data = await _model
       .deleteById(uuid, _queries)
-      .then((data) => ({
-        code: 200,
-        message: 'suppression réussie avec succès',
-        data,
-      }))
+      .then((data) => {
+        if (data.code) return data;
+        return {
+          code: 200,
+          message: 'suppression réussie avec succès',
+          data,
+        };
+      })
       .catch((error: any) => {
         const formatedError = formatPrismaError(error);
         return {
