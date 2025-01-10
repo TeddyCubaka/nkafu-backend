@@ -14,6 +14,7 @@ export class Agent extends BaseModel<'agent'> {
     { proprety: 'mobile', verbose: 'téléphone' },
     { proprety: 'address', verbose: 'adresse' },
     { proprety: 'wallets.solde', verbose: 'porte-feuilles' },
+    { proprety: 'entity.name', verbose: 'territoire' },
     { proprety: 'organization.name', verbose: 'organisation' },
   ];
   createForm: InputType[] = [
@@ -22,6 +23,12 @@ export class Agent extends BaseModel<'agent'> {
     { proprety: 'lastName', verbose: 'prenom', type: 'text' },
     { proprety: 'mobile', verbose: 'téléphone', type: 'text' },
     { proprety: 'address', verbose: 'adresse', type: 'text' },
+    {
+      proprety: 'entityId',
+      verbose: 'territoire',
+      type: 'select',
+      endpoint: 'autocomplete/core/entity',
+    },
     {
       proprety: 'agentBusStops',
       verbose: "parkings d'affectation",
@@ -171,9 +178,9 @@ export class Agent extends BaseModel<'agent'> {
   postFindOne = async (data) => {
     return {
       ...data,
-      agentBusStops : data.agentBusStops.map(busStop => busStop.busStopId)
-    }
-  }
+      agentBusStops: data.agentBusStops.map((busStop) => busStop.busStopId),
+    };
+  };
 
   async findById(id: number | string, query?: any): Promise<any | null> {
     query.where = { ...query['where'], id: id, isDeleted: false };

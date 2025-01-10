@@ -267,10 +267,12 @@ model Entity {
   createdBy User? @relation("Entity-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Entity-updatedBy", fields: [updatedByUserId], references: [id])
 
-  parent    Entity?   @relation("entity-parent", references: [id], fields: [parentId])
-  childrens Entity[]  @relation("entity-parent")
-  recipes   Recipe[]
-  busStops  BusStop[]
+  parent     Entity?     @relation("entity-parent", references: [id], fields: [parentId])
+  childrens  Entity[]    @relation("entity-parent")
+  recipes    Recipe[]
+  busStops   BusStop[]
+  operations Operation[]
+  agents     Agent[]
 }
 
 model Agent {
@@ -283,6 +285,7 @@ model Agent {
   address        String
   organizationId String?
   userId         String? @unique
+  entityId       String?
 
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt
@@ -296,6 +299,7 @@ model Agent {
 
   user         User?         @relation("agent-account", fields: [userId], references: [id])
   organization Organization? @relation(fields: [organizationId], references: [id])
+  entity       Entity?       @relation(fields: [entityId], references: [id])
 
   wallets                Wallet[]
   operationInitializated Operation[]         @relation("operation-initByAgent")
@@ -459,6 +463,7 @@ model Operation {
   initByAgentId   String
   organizationId  String
   closedByAgentId String?
+  entityId        String?
 
   status         OperationStatus
   paiementStatus PaiementStatus
@@ -483,6 +488,7 @@ model Operation {
   initByAgent   Agent         @relation("operation-initByAgent", fields: [initByAgentId], references: [id])
   organization  Organization  @relation(fields: [organizationId], references: [id])
   closedByAgent Agent?        @relation("operation-closedByAgent", fields: [closedByAgentId], references: [id])
+  entity        Entity?       @relation(fields: [entityId], references: [id])
   transactions  Transaction[]
 }
 
