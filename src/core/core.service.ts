@@ -69,7 +69,7 @@ export class CoreService {
       });
     };
 
-    processActions(user.role.roleActions);
+    processActions(user.role?.roleActions);
     processActions(user.userPrivileges);
 
     if (!user.isStaff || userPermissions.size === 0) {
