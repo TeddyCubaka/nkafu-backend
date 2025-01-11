@@ -5,7 +5,7 @@ import { prisma } from 'prisma/lib/prisma';
 @Injectable()
 export class CoreService {
   async loadMenu(userId: string) {
-    let user = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: userId, isActive: true, isDeleted: false },
       select: {
         id: true,
@@ -21,12 +21,14 @@ export class CoreService {
         userPrivileges: { select: { actionId: true, action: true } },
       },
     });
-    if (user == null)
+
+    if (!user) {
       return {
         code: 400,
         message:
-          'Votre compte est non actif dans le système. Veuillez vous rassurer que vous avez toutes les permissions',
+          'Votre compte est non actif dans le système. Veuillez vous rassurer que vous avez toutes les permissions.',
       };
+    }
 
     const menuSelectOptions = {
       id: true,
@@ -55,27 +57,30 @@ export class CoreService {
       delete: false,
     };
 
-    const userPermissions = [
-      ...user.role.roleActions.map((action) => {
-        if (action.action.path.includes('*/*')) {
-          console.log('userSuperAction:::::', action.action.path.split('/'));
-          userSuperAction[action.action.path.split('/')[0]] = true;
-        }
+    const userPermissions = new Set<string>();
 
-        return action.actionId;
-      }),
-      ...user.userPrivileges.map((action) => {
+    const processActions = (actions: any[]) => {
+      actions.forEach((action) => {
         if (action.action.path.includes('*/*')) {
-          userSuperAction[action.action.path.split('/')[0]] = true;
+          const [key] = action.action.path.split('/');
+          userSuperAction[key] = true;
         }
-        return action.actionId;
-      }),
-    ];
+        userPermissions.add(action.actionId);
+      });
+    };
 
-    if (!user.isStaff || userPermissions.length == 0) {
+    processActions(user.role.roleActions);
+    processActions(user.userPrivileges);
+
+    if (!user.isStaff || userPermissions.size === 0) {
+      const profileMenu = await prisma.menu.findMany({
+        where: { name: 'profile' },
+        select: menuSelectOptions,
+      });
+
       return {
         code: 200,
-        message: '1 ligne trouvé',
+        message: '1 ligne trouvée',
         data: [
           {
             id: randomUUID(),
@@ -90,12 +95,7 @@ export class CoreService {
               },
             ],
           },
-          ...(
-            await prisma.menu.findMany({
-              where: { name: 'profile' },
-              select: menuSelectOptions,
-            })
-          ).map((menu) => ({
+          ...profileMenu.map((menu) => ({
             id: menu.id,
             name: menu.name,
             icon: menu.icon,
@@ -113,32 +113,36 @@ export class CoreService {
     const data = await prisma.menu.findMany({
       select: menuSelectOptions,
     });
+
+    const filteredData = data
+      .map((menu) => {
+        const filteredActions = menu.menuActions.filter((action) => {
+          const pathAction = action.action.path.startsWith('/')
+            ? action.action.path.split('/')[1]
+            : action.action.path.split('/')[0];
+          return (
+            userSuperAction[pathAction] || userPermissions.has(action.action.id)
+          );
+        });
+
+        return {
+          id: menu.id,
+          name: menu.name,
+          icon: menu.icon,
+          path: menu.path,
+          actions: filteredActions.map((action) => ({
+            id: action.action.id,
+            name: action.action.name,
+            path: action.action.path,
+          })),
+        };
+      })
+      .filter((menu) => menu.actions.length > 0);
+
     return {
       code: 200,
-      message: `${data.length} lignes trouvées`,
-      data: data
-        .map((menu) => {
-          let filteredAction = menu.menuActions.filter((action) => {
-            const pathAction = action.action.path.startsWith('/')
-              ? action.action.path.split('/')[1]
-              : action.action.path.split('/')[0];
-            if (userSuperAction[pathAction]) return true;
-
-            userPermissions.includes(action.id);
-          });
-          return {
-            id: menu.id,
-            name: menu.name,
-            icon: menu.icon,
-            path: menu.path,
-            actions: filteredAction.map((action) => ({
-              id: action.action.id,
-              name: action.action.name,
-              path: action.action.path,
-            })),
-          };
-        })
-        .filter((menu) => menu.actions.length > 0),
+      message: `${filteredData.length} lignes trouvées`,
+      data: filteredData,
     };
   }
 
