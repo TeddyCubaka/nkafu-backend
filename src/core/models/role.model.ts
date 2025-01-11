@@ -42,7 +42,7 @@ export class Role extends BaseModel<'role'> {
   };
 
   preUpdateSave = async (id: string, data: Record<string, any>) => {
-    await this.prisma.menuAction.deleteMany({ where: { menuId: id } });
+    await this.prisma.roleAction.deleteMany({ where: { roleId: id } });
     return {
       name: data.name,
       roleActions: {

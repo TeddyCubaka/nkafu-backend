@@ -17,6 +17,7 @@ export class User extends BaseModel<'user'> {
     { proprety: 'mobile', verbose: 'mobile' },
     { proprety: 'isRoot', verbose: 'est root' },
     { proprety: 'isActive', verbose: 'actif' },
+    { proprety: 'isStaff', verbose: 'est un staff' },
     {
       proprety: 'mustRenewPassword',
       verbose: 'doit renouveller son mot de passe',
@@ -30,8 +31,33 @@ export class User extends BaseModel<'user'> {
     { proprety: 'password', verbose: 'password', type: 'text' },
     { proprety: 'mail', verbose: 'mail', type: 'text' },
     { proprety: 'mobile', verbose: 'mobile', type: 'text' },
-    { proprety: 'isRoot', verbose: 'isRoot', type: 'boolean' },
-    { proprety: 'isActive', verbose: 'isActive', type: 'boolean' },
+    {
+      proprety: 'isRoot',
+      verbose: 'rendre super-utilisateur',
+      type: 'select',
+      options: [
+        { label: 'oui', value: 'true' },
+        { label: 'non', value: 'false' },
+      ],
+    },
+    {
+      proprety: 'isActive',
+      verbose: 'rendre actif',
+      type: 'select',
+      options: [
+        { label: 'oui', value: 'true' },
+        { label: 'non', value: 'false' },
+      ],
+    },
+    {
+      proprety: 'isStaff',
+      verbose: 'rendre staff',
+      type: 'select',
+      options: [
+        { label: 'oui', value: 'true' },
+        { label: 'non', value: 'false' },
+      ],
+    },
     {
       proprety: 'allowedDeviceNumber',
       verbose: 'nombre des devices max',
@@ -77,6 +103,9 @@ export class User extends BaseModel<'user'> {
 
     return {
       ...data,
+      isRoot: data.isRoot == 'true' ? true : false,
+      isActive: data.isActive == 'true' ? true : false,
+      isStaff: data.isStaff == 'true' ? true : false,
       password: hashedPassword,
       userPrivileges: {
         create: data.userPrivileges.map((actionId) => ({ actionId })),
@@ -88,6 +117,9 @@ export class User extends BaseModel<'user'> {
     await this.prisma.userPrivilege.deleteMany({ where: { userId: id } });
     return {
       ...data,
+      isRoot: data.isRoot == 'true' ? true : false,
+      isActive: data.isActive == 'true' ? true : false,
+      isStaff: data.isStaff == 'true' ? true : false,
       userPrivileges: {
         create: data.userPrivileges.map((actionId) => ({ actionId })),
       },
@@ -109,6 +141,9 @@ export class User extends BaseModel<'user'> {
       delete data.password;
       return {
         ...data,
+        isRoot: data.isRoot == true ? 'true' : 'false',
+        isActive: data.isActive == true ? 'true' : 'false',
+        isStaff: data.isStaff == true ? 'true' : 'false',
         userPrivileges: data.userPrivileges.map(
           (privillege) => privillege.actionId,
         ),

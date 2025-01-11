@@ -335,7 +335,8 @@ export class CoreController {
   }
 
   @Get('load/menu')
-  loadMenu() {
-    return this.coreService.loadMenu();
+  @UseGuards(JwtAuthGuard)
+  loadMenu(@Req() request: Request) {
+    return this.coreService.loadMenu(request.user['userId']);
   }
 }

@@ -28,6 +28,33 @@ const endponts = {
   ],
 };
 
+const superActions: {
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  name: string;
+  path: string;
+}[] = [
+  {
+    method: 'GET',
+    name: 'peut tout lister',
+    path: 'list/*/*',
+  },
+  {
+    method: 'GET',
+    name: 'peut tout créer',
+    path: 'create/*/*',
+  },
+  {
+    method: 'GET',
+    name: 'peut tout mettre à jour',
+    path: 'change/*/*',
+  },
+  {
+    method: 'GET',
+    name: 'peut tout suppri,er',
+    path: 'delete/*/*',
+  },
+];
+
 const methods: {
   method: string;
   verbose: string;
@@ -78,6 +105,27 @@ async function saver() {
         });
         console.log(path.name);
       }
+    });
+
+    superActions.map(async (action) => {
+      await prisma.action.upsert({
+        where: {
+          path_method: {
+            method: action.method,
+            path: action.path,
+          },
+        },
+        update: {
+          method: action.method,
+          path: action.path,
+          name: action.name,
+        },
+        create: {
+          method: action.method,
+          path: action.path,
+          name: action.name,
+        },
+      });
     });
   }
 }

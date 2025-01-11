@@ -33,6 +33,7 @@ model User {
 
   isRoot              Boolean @default(false)
   isActive            Boolean
+  isStaff             Boolean @default(false)
   mustRenewPassword   Boolean @default(true)
   allowedDeviceNumber Int     @default(1)
 
