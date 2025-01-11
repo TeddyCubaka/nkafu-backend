@@ -108,9 +108,10 @@ model UserDevice {
 }
 
 model Organization {
-  id    String @id @unique @default(uuid())
-  name  String @unique
-  photo String
+  id       String  @id @unique @default(uuid())
+  name     String  @unique
+  photo    String
+  walletId String? @unique
 
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt
@@ -123,6 +124,7 @@ model Organization {
   updatedBy  User?       @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
   operations Operation[]
   Agent      Agent[]
+  wallet     Wallet?     @relation("organization-wallet", fields: [walletId], references: [id])
 }
 
 model Action {
@@ -331,9 +333,9 @@ model Currency {
 }
 
 model Wallet {
-  id         String @id @unique @default(uuid())
-  solde      Float  @default(0)
-  agentId    String
+  id         String  @id @unique @default(uuid())
+  solde      Float   @default(0)
+  agentId    String?
   currencyId String
 
   canBeNegative Boolean @default(false)
@@ -348,10 +350,11 @@ model Wallet {
   createdBy User? @relation("Wallet-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Wallet-updatedBy", fields: [updatedByUserId], references: [id])
 
-  agent              Agent               @relation(fields: [agentId], references: [id])
+  agent              Agent?              @relation(fields: [agentId], references: [id])
   currency           Currency            @relation(fields: [currencyId], references: [id])
   transactions       Transaction[]
   walletLiquidations WalletLiquidation[]
+  organization       Organization?       @relation("organization-wallet")
 }
 
 enum RecipeType {

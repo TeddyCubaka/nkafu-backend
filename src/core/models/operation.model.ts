@@ -144,7 +144,7 @@ export class Operation extends BaseModel<'operation'> {
           wallets: true,
         },
       });
-       data = await this.prisma.operation.update({
+      data = await this.prisma.operation.update({
         where: { id: data.id },
         data: {
           paiementStatus: 'SUCCESS',
@@ -171,6 +171,14 @@ export class Operation extends BaseModel<'operation'> {
         where: { id: data.id },
         data: {
           status: 'CLOSED',
+        },
+        include: {
+          transactions: true,
+          initByAgent: {
+            select: {
+              wallets: true,
+            },
+          },
         },
       });
       return data;

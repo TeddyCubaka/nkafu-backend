@@ -41,4 +41,10 @@ export class CoreService {
       })),
     };
   }
+
+  async loadStats(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
 }
