@@ -459,17 +459,24 @@ model Possession {
   operations Operation[]
 }
 
+enum OperationAction {
+  TAXATION
+  LIQUIDATION
+}
+
 model Operation {
   id              String  @id @unique @default(uuid())
-  recipeId        String
-  possessionId    String
+  recipeId        String?
+  possessionId    String?
   initByAgentId   String
   organizationId  String
   closedByAgentId String?
   entityId        String?
+  busStopId       String?
 
   status         OperationStatus
   paiementStatus PaiementStatus
+  action         OperationAction? @default(TAXATION)
 
   totalAmount Float
   paiedAmount Float
@@ -486,20 +493,22 @@ model Operation {
   createdBy User? @relation("Operation-createdBy", fields: [createdByUserId], references: [id])
   updatedBy User? @relation("Operation-updatedBy", fields: [updatedByUserId], references: [id])
 
-  recipe        Recipe        @relation(fields: [recipeId], references: [id])
-  possession    Possession    @relation(fields: [possessionId], references: [id])
+  recipe        Recipe?       @relation(fields: [recipeId], references: [id])
+  possession    Possession?   @relation(fields: [possessionId], references: [id])
   initByAgent   Agent         @relation("operation-initByAgent", fields: [initByAgentId], references: [id])
   organization  Organization  @relation(fields: [organizationId], references: [id])
   closedByAgent Agent?        @relation("operation-closedByAgent", fields: [closedByAgentId], references: [id])
   entity        Entity?       @relation(fields: [entityId], references: [id])
+  busStop       BusStop?      @relation(fields: [busStopId], references: [id])
   transactions  Transaction[]
 }
 
 model Transaction {
-  id          String @id @unique @default(uuid())
-  amout       Float
+  id          String  @id @unique @default(uuid())
+  amount      Float   @map("amout")
   walletId    String
   operationId String
+  motif       String?
 
   paiemendStatus  PaiementStatus
   operationStatus OperationStatus
@@ -581,6 +590,7 @@ model BusStop {
 
   entity        Entity?        @relation(fields: [entityId], references: [id])
   agentBusStops AgentBusStop[]
+  operations    Operation[]
 }
 
 model AgentBusStop {

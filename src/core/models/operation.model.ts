@@ -8,10 +8,17 @@ export class Operation extends BaseModel<'operation'> {
   }
 
   listColumns: ColumnType[] = [
+    { proprety: 'action', verbose: 'motif' },
     { proprety: 'recipe.name', verbose: 'recette' },
     { proprety: 'possession.uniqueNumber', verbose: 'ID de la possession' },
     { proprety: 'possession.type', verbose: 'appliqué sur une' },
+    { proprety: 'possession.taxPayer.fullName', verbose: 'redevable' },
+    {
+      proprety: 'possession.taxPayer.uniqueId',
+      verbose: 'matricule du redevable',
+    },
     { proprety: 'initByAgent.firstName', verbose: 'initialisé par' },
+    { proprety: 'busStop.name', verbose: 'initialisé par' },
     { proprety: 'closedByAgent.firstName', verbose: 'clôturé par' },
     { proprety: 'organization.name', verbose: 'organisation' },
     { proprety: 'status', verbose: "statut de l'opération" },
@@ -33,6 +40,12 @@ export class Operation extends BaseModel<'operation'> {
       type: 'select',
       endpoint: 'autocomplete/core/possession',
     },
+    {
+      proprety: 'busStopId',
+      verbose: 'parking',
+      type: 'select',
+      endpoint: 'autocomplete/core/busStop',
+    },
   ];
 
   updateForm: InputType[] = [...this.createForm];
@@ -41,6 +54,7 @@ export class Operation extends BaseModel<'operation'> {
     recipeId: string;
     possessionId: string;
     createdByUserId: string;
+    busStopId: string;
   }) => Promise<Record<string, any>> = async (data) => {
     const userAccount = await this.prisma.user.findUnique({
       where: { id: data.createdByUserId },
@@ -115,6 +129,7 @@ export class Operation extends BaseModel<'operation'> {
       totalAmount: recipe.pricing,
       paiedAmount: recipe.pricing,
       isClosed: false,
+      busStopId: data.busStopId,
     };
   };
 
@@ -151,7 +166,7 @@ export class Operation extends BaseModel<'operation'> {
           closedByAgent: { connect: { id: data.initByAgentId } },
           transactions: {
             create: {
-              amout: data.paiedAmount,
+              amount: data.paiedAmount,
               walletId: agent.wallets[0].id,
               paiemendStatus: 'SUCCESS',
               operationStatus: 'CLOSED',

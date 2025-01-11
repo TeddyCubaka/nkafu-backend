@@ -2,6 +2,7 @@ import { InputType } from 'src/types/models';
 import { BaseModel, ColumnType } from './base';
 import { Prisma } from '@prisma/client';
 import { formatPrismaError } from 'src/utils/format-prisma-error';
+import { NotFoundException } from '@nestjs/common';
 
 export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
   constructor() {
@@ -140,9 +141,21 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
       updatedByUserId: string;
     },
   ) => {
-    const liquidation = await this.prisma.walletLiquidation.findUniqueOrThrow({
-      where: { id },
+    const liquidation = await this.prisma.walletLiquidation.findUnique({
+      where: {
+        id,
+        isDeleted: false,
+      },
+      include: {
+        agent: { select: { organization: true } },
+      },
     });
+
+    if (liquidation == null || liquidation.agent == null) {
+      throw new NotFoundException(
+        'liquidation non trouvé ou invalide dans le système',
+      );
+    }
 
     if (liquidation.status !== 'PENDING') {
       throw new Error('Cette liquidation est déjà validé');
@@ -152,17 +165,28 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
       where: {
         id: data.updatedByUserId,
         isDeleted: false,
-        agent: { isNot: null },
       },
       include: {
         agent: {
-          include: { wallets: true },
+          include: { wallets: true, organization: true },
         },
       },
     });
 
     if (user == null) {
       throw new Error("vous n'êtes pas eligible à cette fonctionnalité");
+    }
+
+    if (!user.agent?.organization || user.agent?.organization == null) {
+      throw new Error(
+        "vous n'appartenez à aucune organisation pour effectuer une liquidation",
+      );
+    }
+
+    if (user.agent.organization.id !== liquidation.agent.organization.id) {
+      throw new Error(
+        "vous n'appartenez à la même organisation que cette liquidation pour la valider",
+      );
     }
 
     const status = data.confirmation == 'true' ? 'CLOSED' : 'REJECTED';
@@ -179,6 +203,18 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
     data: Record<string, any>,
   ) => Promise<Record<string, any>> = async (id, data) => {
     try {
+      const liquidation = await this.prisma.walletLiquidation.findUnique({
+        where: {
+          id,
+          isDeleted: false,
+        },
+        include: {
+          agent: { select: { organization: true } },
+        },
+      });
+
+      if (liquidation == null) return data;
+
       const user = await this.prisma.user.findUnique({
         where: {
           id: data.createdByUserId,
@@ -187,7 +223,10 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
         },
         include: {
           agent: {
-            include: { wallets: true },
+            include: {
+              wallets: true,
+              organization: { include: { wallet: true } },
+            },
           },
         },
       });
@@ -203,17 +242,100 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
         );
       }
 
-      // if (user.agent.wallets[0].solde < data.amount) {
-      // throw new Error("Le solde disponible de l'agent est inferieur à cette li");
-      // }
-      const newSolde =
-        Number(data.amout) - Number(user.agent.wallets[0].solde) || 0;
-      await this.prisma.wallet.update({
-        where: { id: user.agent.wallets[0].id },
+      const newSolde = user.agent.wallets[0].solde - liquidation.amount;
+      if (newSolde < 0)
+        throw new Error(
+          "le disponible dans la balance n'est pas suffisant pour faire cette liquidation",
+        );
+      const operation = await this.prisma.operation.create({
         data: {
-          solde: newSolde,
+          initByAgent: { connect: { id: user.agent.id } },
+          organization: {
+            connect: { id: user.agent.organizationId },
+          },
+          closedByAgent: { connect: { id: user.agent.id } },
+          status: 'CLOSED',
+          paiementStatus: 'SUCCESS',
+          action: 'LIQUIDATION',
+          totalAmount: liquidation.amount,
+          paiedAmount: liquidation.amount,
+          isClosed: true,
+          transactions: {
+            create: [
+              {
+                amount: liquidation.amount,
+                operationStatus: 'CLOSED',
+                walletId: user.agent.wallets[0].id,
+                paiemendStatus: 'SUCCESS',
+                transactionType: 'DEBIT',
+              },
+              {
+                amount: liquidation.amount,
+                operationStatus: 'CLOSED',
+                walletId: user.agent.organization.walletId,
+                paiemendStatus: 'SUCCESS',
+                transactionType: 'CREDIT',
+              },
+            ],
+          },
         },
       });
+
+      await this.prisma.organization
+        .update({
+          where: { id: user.agent.organizationId },
+          data: {
+            wallet: {
+              update: {
+                solde:
+                  user.agent.organization.wallet.solde + liquidation.amount,
+              },
+            },
+          },
+        })
+        .catch(async (error) => {
+          await this.prisma.operation.update({
+            where: { id: operation.id },
+            data: {
+              status: 'REJECTED',
+              paiementStatus: 'FAILED',
+              transactions: {
+                updateMany: {
+                  where: { operationId: operation.id },
+                  data: {
+                    paiemendStatus: 'FAILED',
+                  },
+                },
+              },
+            },
+          });
+        });
+
+      await this.prisma.wallet
+        .update({
+          where: { id: user.agent.wallets[0].id },
+          data: {
+            solde: newSolde,
+          },
+        })
+        .catch(async (error) => {
+          await this.prisma.operation.update({
+            where: { id: operation.id },
+            data: {
+              status: 'REJECTED',
+              paiementStatus: 'FAILED',
+              transactions: {
+                updateMany: {
+                  where: { operationId: operation.id },
+                  data: {
+                    paiemendStatus: 'FAILED',
+                  },
+                },
+              },
+            },
+          });
+          throw error.message;
+        });
 
       return data;
     } catch (err) {
