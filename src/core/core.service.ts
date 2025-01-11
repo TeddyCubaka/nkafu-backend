@@ -114,30 +114,33 @@ export class CoreService {
       select: menuSelectOptions,
     });
 
-    const filteredData = data
-      .map((menu) => {
-        const filteredActions = menu.menuActions.filter((action) => {
-          const pathAction = action.action.path.startsWith('/')
-            ? action.action.path.split('/')[1]
-            : action.action.path.split('/')[0];
-          return (
-            userSuperAction[pathAction] || userPermissions.has(action.action.id)
-          );
-        });
+    const filteredData = user.isRoot
+      ? data
+      : data
+          .map((menu) => {
+            const filteredActions = menu.menuActions.filter((action) => {
+              const pathAction = action.action.path.startsWith('/')
+                ? action.action.path.split('/')[1]
+                : action.action.path.split('/')[0];
+              return (
+                userSuperAction[pathAction] ||
+                userPermissions.has(action.action.id)
+              );
+            });
 
-        return {
-          id: menu.id,
-          name: menu.name,
-          icon: menu.icon,
-          path: menu.path,
-          actions: filteredActions.map((action) => ({
-            id: action.action.id,
-            name: action.action.name,
-            path: action.action.path,
-          })),
-        };
-      })
-      .filter((menu) => menu.actions.length > 0);
+            return {
+              id: menu.id,
+              name: menu.name,
+              icon: menu.icon,
+              path: menu.path,
+              actions: filteredActions.map((action) => ({
+                id: action.action.id,
+                name: action.action.name,
+                path: action.action.path,
+              })),
+            };
+          })
+          .filter((menu) => menu.actions.length > 0);
 
     return {
       code: 200,
