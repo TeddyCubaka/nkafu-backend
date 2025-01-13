@@ -15,6 +15,7 @@ import { TaxPayer } from './taxPayer.model';
 import { TaxPayerType } from './taxPayerType.model';
 import { User } from './user.model';
 import { Wallet } from './wallet.model';
+import { AgentBusStop } from './agentBusStop.model';
 
 export const coreConfig = {
   Agent,
@@ -34,4 +35,5 @@ export const coreConfig = {
   BusStop,
   WalletLiquidation,
   Wallet,
+  AgentBusStop,
 };
