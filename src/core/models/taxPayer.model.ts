@@ -12,6 +12,7 @@ export class TaxPayer extends BaseModel<'taxPayer'> {
     { proprety: 'fullName', verbose: 'nom complet' },
     { proprety: 'mobile', verbose: 'téléphone' },
     { proprety: 'type.name', verbose: 'type' },
+    { proprety: 'createdAt', verbose: 'créé le' },
   ];
   createForm: InputType[] = [
     { proprety: 'fullName', verbose: 'nom complet', type: 'text' },
