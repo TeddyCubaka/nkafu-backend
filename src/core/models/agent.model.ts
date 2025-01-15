@@ -14,6 +14,7 @@ export class Agent extends BaseModel<'agent'> {
     { proprety: 'mobile', verbose: 'téléphone' },
     { proprety: 'address', verbose: 'adresse' },
     { proprety: 'wallets.solde', verbose: 'porte-feuilles' },
+    { proprety: 'user.mobile', verbose: 'user mobile' },
     { proprety: 'entity.name', verbose: 'territoire' },
     { proprety: 'organization.name', verbose: 'organisation' },
   ];

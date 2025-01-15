@@ -340,4 +340,11 @@ export class CoreController {
     const data = await this.coreService.loadMenu(request.user['userId']);
     return res.status(data.code).json(data);
   }
+
+  @Get('load/stats')
+  @UseGuards(JwtAuthGuard)
+  async userStats(@Req() request: Request, @Res() res: Response) {
+    const data = await this.coreService.loadStats(request.user['userId']);
+    return res.status(data.code).json(data);
+  }
 }

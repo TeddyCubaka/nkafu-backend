@@ -124,7 +124,7 @@ model Organization {
   createdBy  User?       @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
   updatedBy  User?       @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
   operations Operation[]
-  Agent      Agent[]
+  agents      Agent[]
   wallet     Wallet?     @relation("organization-wallet", fields: [walletId], references: [id])
 }
 
