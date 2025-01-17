@@ -9,6 +9,7 @@ export class AgentBusStop extends BaseModel<'agentBusStop'> {
   listColumns: ColumnType[] = [
     { proprety: 'agent.firstName', verbose: "nom de l'agent" },
     { proprety: 'agent.lastName', verbose: "post-nom de l'agent" },
+    { proprety: 'busStop.id', verbose: 'id' },
     { proprety: 'busStop.name', verbose: 'parking' },
     { proprety: 'busStop.entity.name', verbose: 'entité du parking' },
   ];
