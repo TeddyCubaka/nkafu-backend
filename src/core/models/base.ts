@@ -113,15 +113,22 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   generateInclude(): Record<string, any> {
-    const include: Record<string, any> = { id: true };
+    const select: Record<string, any> = { id: true };
     if (this.listColumns == '*') return {};
     this.listColumns.forEach((column) => {
       const keys = column.proprety.split('.');
-      let currentLevel = include;
+      let currentLevel = select;
 
       keys.forEach((key, index) => {
         if (!currentLevel[key]) {
-          currentLevel[key] = index === keys.length - 1 ? true : { select: {} };
+          currentLevel[key] =
+            index === keys.length - 1
+              ? true
+              : {
+                  select: {
+                    id: true,
+                  },
+                };
         }
         if (index < keys.length - 1) {
           currentLevel = currentLevel[key].select;
@@ -129,6 +136,6 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
       });
     });
 
-    return include;
+    return select;
   }
 }
