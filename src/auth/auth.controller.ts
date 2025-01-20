@@ -18,7 +18,8 @@ import { Utils } from 'src/utils/utils';
 import { Request, Response } from 'express';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { type } from 'os';
+import { UserDevice } from 'src/types/userDevice.auth';
+const useragent = require('useragent');
 
 @Controller('')
 export class AuthController {
@@ -31,10 +32,20 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   async login(
     @Body() body: LoginInterface,
-    @Req() req: Request,
+    @Req() request: Request,
     @Res() res: Response,
   ) {
-    const data = await this.authService.login(body);
+    const agent = useragent.parse(request.headers['user-agent']);
+
+    const deviceData: UserDevice = {
+      deviceInnerId: this.generateDeviceInnerId(agent),
+      deviceType: agent.device.family || 'unknown',
+      os: `${agent.os.family} ${agent.os.major}`,
+      browser: `${agent.family} ${agent.major}`,
+      ip: request.ip || String(request.headers['x-forwarded-for']) || '0.0.0.0',
+    };
+
+    const data = await this.authService.login(body, deviceData);
     return res.status(data.code).json(data);
   }
 
@@ -111,5 +122,22 @@ export class AuthController {
     });
 
     return res.status(response.code).json(response);
+  }
+
+  private generateDeviceInnerId(agent: any): string {
+    const identifier =
+      `${agent.family}-${agent.major}-${agent.os.family}-${agent.os.major}-${agent.device.family}`
+        .toLowerCase()
+        .replace(/\s/g, '');
+    return this.hashDeviceSTring(identifier);
+  }
+
+  private hashDeviceSTring(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash.toString(16);
   }
 }

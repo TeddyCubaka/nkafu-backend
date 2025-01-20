@@ -6,6 +6,7 @@ import { prisma } from 'prisma/lib/prisma';
 import { Utils } from 'src/utils/utils';
 import { UserConnectionLog } from 'src/utils/userConnectionLogs';
 import { formatPrismaError } from 'src/utils/format-prisma-error';
+import { UserDevice } from 'src/types/userDevice.auth';
 
 @Injectable()
 export class AuthService {
@@ -14,11 +15,12 @@ export class AuthService {
     private utils: Utils,
   ) {}
 
-  async login(reqBody: any) {
+  async login(reqBody: any, userDevice: UserDevice) {
     try {
       const user = await this.validateUser(
         reqBody.identifier,
         reqBody.password,
+        userDevice,
       );
 
       if (user.code >= 400 || 'data' in user == false) return user;
@@ -86,39 +88,27 @@ export class AuthService {
     return savedUser;
   }
 
-  async validateUser(identifier: string, password: string) {
-    let user = await prisma.user.findFirst({
-      where: {
-        OR: [{ mobile: identifier }, { name: identifier }],
-        isActive: true,
-        isDeleted: false,
-      },
-    });
-
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const today = new Date();
-      const currentYear = today.getFullYear().toString();
-      const currentMonth = (today.getMonth() + 1).toString(); // Mois de 1 à 12
-      const currentDate = today.toLocaleDateString();
-
-      let logs = user.meta['logs'] || {};
-      if (!logs[currentYear]) {
-        logs[currentYear] = {};
-      }
-      if (!logs[currentYear][currentMonth]) {
-        logs[currentYear][currentMonth] = [];
-      }
-      if (!logs[currentYear][currentMonth].includes(currentDate)) {
-        logs[currentYear][currentMonth].push(currentDate);
-      }
-
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          meta: { logs },
+  async validateUser(
+    identifier: string,
+    password: string,
+    userDevice: UserDevice,
+  ) {
+    try {
+      let user = await prisma.user.findFirst({
+        where: {
+          OR: [{ mobile: identifier }, { name: identifier }],
+          isActive: true,
+          isDeleted: false,
         },
         include: {
-          userDevices: true,
+          _count: {
+            select: {
+              userDevices: true,
+            },
+          },
+          userDevices: {
+            where: { deviceInnerId: userDevice.deviceInnerId },
+          },
           agent: {
             include: {
               wallets: { include: { currency: true } },
@@ -128,17 +118,82 @@ export class AuthService {
           role: true,
         },
       });
-      const { password, ...result } = user;
+
+      if (user && (await bcrypt.compare(password, user.password))) {
+        const today = new Date();
+        const currentYear = today.getFullYear().toString();
+        const currentMonth = (today.getMonth() + 1).toString();
+        const currentDate = today.toLocaleDateString();
+
+        let logs = user.meta['logs']['login'] || { login: {} };
+        if (!logs[currentYear]) {
+          logs[currentYear] = {};
+        }
+        if (!logs[currentYear][currentMonth]) {
+          logs[currentYear][currentMonth] = [];
+        }
+        if (!logs[currentYear][currentMonth].includes(currentDate)) {
+          logs[currentYear][currentMonth].push(currentDate);
+        }
+
+        if (
+          user.userDevices.length == 0 &&
+          user.allowedDeviceNumber == user._count.userDevices
+        ) {
+          return {
+            code: 400,
+            message:
+              'vous avez atteint le nombre maximum des connexion des appereil qui vous sont autorisés',
+            user,
+          };
+        } else if (
+          user.userDevices.length == 0 &&
+          user.allowedDeviceNumber > user._count.userDevices
+        ) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              userDevices: {
+                create: {
+                  deviceInnerId: userDevice.deviceInnerId,
+                  deviceType: userDevice.deviceType,
+                  os: userDevice.os,
+                  browser: userDevice.browser,
+                  ip: userDevice.ip,
+                },
+              },
+            },
+          });
+        }
+
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            meta: { logs: {} },
+          },
+        });
+        const { password, ...result } = user;
+
+        // if (user.userDevices.length > 0) {
+        // }
+        return {
+          code: 200,
+          message: 'connexion réussie',
+          data: result,
+        };
+      }
       return {
-        code: 200,
-        message: 'connexion réussie',
-        data: result,
+        code: 404,
+        message: 'compte introuvable ou mot de passe incorrect',
+      };
+    } catch (error) {
+      const formatedError = formatPrismaError(error);
+      return {
+        code: formatedError.code,
+        message: formatedError.message,
+        // data : formatedError
       };
     }
-    return {
-      code: 404,
-      message: 'compte introuvable ou mot de passe incorrect',
-    };
   }
 
   async changeUserPassword(data: {

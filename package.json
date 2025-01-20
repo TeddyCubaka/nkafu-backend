@@ -36,7 +36,8 @@
     "prisma": "^6.1.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
-    "user-agent": "^1.0.4"
+    "user-agent": "^1.0.4",
+    "useragent": "^2.3.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

@@ -97,13 +97,14 @@ model User {
 }
 
 model UserDevice {
-  id         String   @id @default(cuid())
-  userId     String
-  deviceType String
-  os         String
-  browser    String
-  ip         String
-  createdAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  deviceInnerId String
+  userId        String
+  deviceType    String
+  os            String
+  browser       String
+  ip            String
+  createdAt     DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -124,7 +125,7 @@ model Organization {
   createdBy  User?       @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
   updatedBy  User?       @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
   operations Operation[]
-  agents      Agent[]
+  agents     Agent[]
   wallet     Wallet?     @relation("organization-wallet", fields: [walletId], references: [id])
 }
 
