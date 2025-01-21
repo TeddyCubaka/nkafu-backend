@@ -7,6 +7,7 @@ import { Utils } from 'src/utils/utils';
 import { UserConnectionLog } from 'src/utils/userConnectionLogs';
 import { formatPrismaError } from 'src/utils/format-prisma-error';
 import { UserDevice } from 'src/types/userDevice.auth';
+import { MailUtil } from 'src/utils/mail.util';
 
 @Injectable()
 export class AuthService {
@@ -138,7 +139,7 @@ export class AuthService {
 
         if (
           user.userDevices.length == 0 &&
-          user.allowedDeviceNumber == user._count.userDevices
+          user.allowedDeviceNumber >= user._count.userDevices
         ) {
           return {
             code: 400,
@@ -166,6 +167,13 @@ export class AuthService {
           });
         }
 
+        const mailUtil = new MailUtil();
+        // await mailUtil.sendMail(
+        //   'teddycubaka96@gmail.com',
+        //   'hello gars',
+        //   'connection here',
+        // );
+
         await prisma.user.update({
           where: { id: user.id },
           data: {
@@ -187,6 +195,7 @@ export class AuthService {
         message: 'compte introuvable ou mot de passe incorrect',
       };
     } catch (error) {
+      console.log(error);
       const formatedError = formatPrismaError(error);
       return {
         code: formatedError.code,
