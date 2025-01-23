@@ -142,10 +142,11 @@ export class AuthController {
 
     return res.status(response.code).json(response);
   }
+
   @Get('auth/otp/:method')
   @UseGuards(JwtAuthGuard)
   async sendOtpToUser(
-    @Req() req: Request,
+    @Req() request: Request,
     @Param('method') method: 'sms' | 'email',
     @Res() res: Response,
   ) {
@@ -153,11 +154,49 @@ export class AuthController {
       return res
         .status(400)
         .json({ code: 400, message: 'methode non supportée' });
-    const userId = req.user['userId'];
+    const userId = request.user['userId'];
     const otpManager = new OTPManager();
 
     try {
-      const otpStatus = await otpManager.generateAndSendOTP(userId, method);
+      const agent = useragent.parse(request.headers['user-agent']);
+
+      const deviceInnerId = this.generateDeviceInnerId(agent);
+
+      const otpStatus = await otpManager.generateAndSendOTP(
+        userId,
+        method,
+        deviceInnerId,
+      );
+      return res.status(otpStatus.code).json(otpStatus);
+    } catch (error) {
+      return res.status(400).json({
+        code: 400,
+        message: "une erreur s'est passée lors de l'envoie de l'otp",
+        error: {
+          message: error.message,
+        },
+      });
+    }
+  }
+
+  @Post('auth/otp/validation')
+  @UseGuards(JwtAuthGuard)
+  async validateOtpCode(
+    @Req() request: Request,
+    @Body() body: { otp: string },
+    @Res() res: Response,
+  ) {
+    const userId = request.user['userId'];
+    const otpManager = new OTPManager();
+
+    try {
+      const agent = useragent.parse(request.headers['user-agent']);
+      const deviceInnerId = this.generateDeviceInnerId(agent);
+      const otpStatus = await otpManager.verifyOTP(
+        userId,
+        body.otp,
+        deviceInnerId,
+      );
       return res.status(otpStatus.code).json(otpStatus);
     } catch (error) {
       return res.status(400).json({

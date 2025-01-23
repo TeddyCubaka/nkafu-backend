@@ -106,7 +106,7 @@ export class AuthService {
             },
           },
           userDevices: {
-            where: { deviceInnerId: userDevice.deviceInnerId },
+            where: { deviceInnerId: userDevice.deviceInnerId, isActive: true },
           },
           agent: {
             include: {
@@ -154,6 +154,20 @@ export class AuthService {
             '20m',
             'otp',
           );
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              userDevices: {
+                create: {
+                  deviceInnerId: userDevice.deviceInnerId,
+                  deviceType: userDevice.deviceType,
+                  os: userDevice.os,
+                  browser: userDevice.browser,
+                  ip: userDevice.ip,
+                },
+              },
+            },
+          });
           return {
             code: 200,
             message:
@@ -165,20 +179,6 @@ export class AuthService {
             ],
             token: accessToken,
           };
-          // await prisma.user.update({
-          //   where: { id: user.id },
-          //   data: {
-          //     userDevices: {
-          //       create: {
-          //         deviceInnerId: userDevice.deviceInnerId,
-          //         deviceType: userDevice.deviceType,
-          //         os: userDevice.os,
-          //         browser: userDevice.browser,
-          //         ip: userDevice.ip,
-          //       },
-          //     },
-          //   },
-          // });
         }
 
         await prisma.user.update({

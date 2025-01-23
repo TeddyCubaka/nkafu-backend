@@ -10,7 +10,11 @@ export class OTPManager {
     this.db = prisma;
   }
 
-  async generateAndSendOTP(userId: string, method: 'sms' | 'email') {
+  async generateAndSendOTP(
+    userId: string,
+    method: 'sms' | 'email',
+    deviceInnerId: string,
+  ) {
     const otp = this.generateOTP();
     const user = await this.db.user.findUnique({ where: { id: userId } });
     let data: { [key: string]: any } | null = null;
@@ -23,6 +27,13 @@ export class OTPManager {
         throw new Error("Cet n'a pas d'adresse email");
       data = await this.sendEmail(user.mail, otp);
     }
+    await this.db.userDevice.updateMany({
+      where: { deviceInnerId, userId },
+      /*
+       * save the token into the user device and set the expiration time to 20 seconds
+       */
+      data: { otp: +otp, otpExpireAt: new Date(Date.now() + 20000) },
+    });
     return data;
   }
 
@@ -48,9 +59,63 @@ export class OTPManager {
     );
   }
 
-  async verifyOTP(userId: string, otp: string) {
-    //   : Promise<boolean>
-    // return storedOTP === otp;
+  async verifyOTP(
+    userId: string,
+    otp: string,
+    deviceInnerId: string,
+  ): Promise<{ code: number; message: string; data?: any }> {
+    const userDevice = await this.db.userDevice.findFirst({
+      where: {
+        userId,
+        otp: +otp,
+        otpExpireAt: { gte: new Date() },
+        deviceInnerId,
+      },
+    });
+    if (userDevice) {
+      let user = await prisma.user.update({
+        where: {
+          id: userId,
+          isActive: true,
+          isDeleted: false,
+        },
+        data: {
+          userDevices: {
+            updateMany: {
+              where: { userId, otp: +otp },
+              data: { isActive: true },
+            },
+          },
+        },
+        include: {
+          _count: {
+            select: {
+              userDevices: true,
+            },
+          },
+          userDevices: {
+            where: { deviceInnerId: userDevice.deviceInnerId, isActive: true },
+          },
+          agent: {
+            include: {
+              wallets: { include: { currency: true } },
+              organization: true,
+            },
+          },
+          role: true,
+        },
+      });
+
+      return {
+        code: 200,
+        message: 'Code vérifié avec succès',
+        data: user,
+      };
+    }
+    return {
+      code: 400,
+      message: 'Code incorrect ou expiré',
+    };
   }
 }
 

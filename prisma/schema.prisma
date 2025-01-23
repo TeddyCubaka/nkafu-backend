@@ -97,14 +97,17 @@ model User {
 }
 
 model UserDevice {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   deviceInnerId String
   userId        String
   deviceType    String
   os            String
   browser       String
   ip            String
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
+  otp           Int?
+  otpExpireAt   DateTime?
+  isActive      Boolean   @default(false)
 
   user User @relation(fields: [userId], references: [id])
 }
