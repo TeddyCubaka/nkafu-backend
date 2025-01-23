@@ -156,6 +156,10 @@ export class AuthService {
             message:
               'Veuillez choisir un moyen par le quel nous allons vous envoyer le code de confirmation',
             redirectToOpt: true,
+            otpMethod: [
+              { name: 'sms', value: 'sms' },
+              { name: 'email', value: 'email' },
+            ],
           };
           // await prisma.user.update({
           //   where: { id: user.id },

@@ -28,6 +28,23 @@ export class AuthController {
     private utils: Utils,
   ) {}
 
+  private generateDeviceInnerId(agent: any): string {
+    const identifier =
+      `${agent.family}-${agent.major}-${agent.os.family}-${agent.os.major}-${agent.device.family}`
+        .toLowerCase()
+        .replace(/\s/g, '');
+    return this.hashDeviceSTring(identifier);
+  }
+
+  private hashDeviceSTring(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return hash.toString(16);
+  }
+
   @Post('auth/login')
   @UseGuards(LocalAuthGuard)
   async login(
@@ -124,20 +141,5 @@ export class AuthController {
     return res.status(response.code).json(response);
   }
 
-  private generateDeviceInnerId(agent: any): string {
-    const identifier =
-      `${agent.family}-${agent.major}-${agent.os.family}-${agent.os.major}-${agent.device.family}`
-        .toLowerCase()
-        .replace(/\s/g, '');
-    return this.hashDeviceSTring(identifier);
-  }
-
-  private hashDeviceSTring(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = (hash << 5) - hash + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return hash.toString(16);
-  }
+  
 }
