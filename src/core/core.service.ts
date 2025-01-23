@@ -77,7 +77,7 @@ export class CoreService {
       select: menuSelectOptions,
     });
 
-    if (!user.isStaff || userPermissions.size === 0) {
+    if (!user.isStaff && userPermissions.size === 0) {
       return {
         code: 200,
         message: '1 ligne trouvée',
@@ -116,7 +116,7 @@ export class CoreService {
 
     let userHasProfileMenu = false;
 
-    let filteredData:any = user.isRoot
+    let filteredData: any = user.isRoot
       ? data
       : data
           .map((menu) => {

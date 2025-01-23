@@ -126,7 +126,7 @@ export class AuthService {
         const currentMonth = (today.getMonth() + 1).toString();
         const currentDate = today.toLocaleDateString();
 
-        let logs = user.meta['logs']['login'] || { login: {} };
+        let logs = user.meta['logs']?.login || { login: {} };
         if (!logs[currentYear]) {
           logs[currentYear] = {};
         }
@@ -139,7 +139,7 @@ export class AuthService {
 
         if (
           user.userDevices.length == 0 &&
-          user.allowedDeviceNumber >= user._count.userDevices
+          user._count.userDevices >= user.allowedDeviceNumber
         ) {
           return {
             code: 400,
@@ -151,28 +151,27 @@ export class AuthService {
           user.userDevices.length == 0 &&
           user.allowedDeviceNumber > user._count.userDevices
         ) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              userDevices: {
-                create: {
-                  deviceInnerId: userDevice.deviceInnerId,
-                  deviceType: userDevice.deviceType,
-                  os: userDevice.os,
-                  browser: userDevice.browser,
-                  ip: userDevice.ip,
-                },
-              },
-            },
-          });
+          return {
+            code: 200,
+            message:
+              'Veuillez choisir un moyen par le quel nous allons vous envoyer le code de confirmation',
+            redirectToOpt: true,
+          };
+          // await prisma.user.update({
+          //   where: { id: user.id },
+          //   data: {
+          //     userDevices: {
+          //       create: {
+          //         deviceInnerId: userDevice.deviceInnerId,
+          //         deviceType: userDevice.deviceType,
+          //         os: userDevice.os,
+          //         browser: userDevice.browser,
+          //         ip: userDevice.ip,
+          //       },
+          //     },
+          //   },
+          // });
         }
-
-        const mailUtil = new MailUtil();
-        // await mailUtil.sendMail(
-        //   'teddycubaka96@gmail.com',
-        //   'hello gars',
-        //   'connection here',
-        // );
 
         await prisma.user.update({
           where: { id: user.id },
@@ -182,11 +181,10 @@ export class AuthService {
         });
         const { password, ...result } = user;
 
-        // if (user.userDevices.length > 0) {
-        // }
         return {
           code: 200,
           message: 'connexion réussie',
+          redirectToOpt: false,
           data: result,
         };
       }
