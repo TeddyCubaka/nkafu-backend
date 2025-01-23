@@ -151,6 +151,14 @@ export class AuthService {
           user.userDevices.length == 0 &&
           user.allowedDeviceNumber > user._count.userDevices
         ) {
+          const payload = {
+            mobile: user.mobile,
+            sub: user.id,
+            mail: user.mail,
+            userId: user.id, 
+          };
+
+          const accessToken = this.jwtService.sign(payload);
           return {
             code: 200,
             message:
@@ -160,6 +168,7 @@ export class AuthService {
               { name: 'sms', value: 'sms' },
               { name: 'email', value: 'email' },
             ],
+            token: accessToken,
           };
           // await prisma.user.update({
           //   where: { id: user.id },

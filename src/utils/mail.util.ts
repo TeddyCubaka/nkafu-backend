@@ -16,12 +16,28 @@ export class MailUtil {
   }
 
   async sendMail(to: string, subject: string, html: string) {
-    await this.transporter.sendMail({
-      from: `"No Reply" noreply@ziro-pay.com`,
-    //   from: `"No Reply" <${this.transporter.auth.user}>`,
-      to,
-      subject,
-      html,
-    });
+    try {
+      const data = await this.transporter.sendMail({
+        from: `"No Reply" noreply@ziro-pay.com`,
+        //   from: `"No Reply" <${this.transporter.auth.user}>`,
+        to,
+        subject,
+        html,
+      });
+
+      return {
+        code: 200,
+        message: 'Mail envoyé avec succès',
+        data: data,
+      };
+    } catch (error) {
+      return {
+        code: 400,
+        message: 'envoi de mail échoué',
+        error: {
+          message: error.message,
+        },
+      };
+    }
   }
 }

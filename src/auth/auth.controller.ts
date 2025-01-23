@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Put,
@@ -19,6 +20,7 @@ import { Request, Response } from 'express';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserDevice } from 'src/types/userDevice.auth';
+import { OTPManager } from './utils/otpManager';
 const useragent = require('useragent');
 
 @Controller('')
@@ -140,6 +142,31 @@ export class AuthController {
 
     return res.status(response.code).json(response);
   }
+  @Get('auth/otp/:method')
+  @UseGuards(JwtAuthGuard)
+  async sendOtpToUser(
+    @Req() req: Request,
+    @Param('method') method: 'sms' | 'email',
+    @Res() res: Response,
+  ) {
+    if (method !== 'sms' && method !== 'email')
+      return res
+        .status(400)
+        .json({ code: 400, message: 'methode non supportée' });
+    const userId = req.user['userId'];
+    const otpManager = new OTPManager();
 
-  
+    try {
+      const otpStatus = await otpManager.generateAndSendOTP(userId, method);
+      return res.status(otpStatus.code).json(otpStatus);
+    } catch (error) {
+      return res.status(400).json({
+        code: 400,
+        message: "une erreur s'est passée lors de l'envoie de l'otp",
+        error: {
+          message: error.message,
+        },
+      });
+    }
+  }
 }
