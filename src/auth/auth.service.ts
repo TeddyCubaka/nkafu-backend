@@ -8,12 +8,14 @@ import { UserConnectionLog } from 'src/utils/userConnectionLogs';
 import { formatPrismaError } from 'src/utils/format-prisma-error';
 import { UserDevice } from 'src/types/userDevice.auth';
 import { MailUtil } from 'src/utils/mail.util';
+import { TokenService } from 'src/utils/token';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly jwtService: JwtService,
+    // private readonly jwtService: JwtService,
     private utils: Utils,
+    private readonly tokenService: TokenService,
   ) {}
 
   async login(reqBody: any, userDevice: UserDevice) {
@@ -25,14 +27,10 @@ export class AuthService {
       );
 
       if (user.code >= 400 || 'data' in user == false) return user;
-      const payload = {
-        mobile: user.data.mobile,
-        sub: user.data.id,
-        mail: user.data.mail,
-        roleId: user.data.roleId,
-      };
-
-      const accessToken = this.jwtService.sign(payload);
+      const accessToken = this.tokenService.generateAccessToken(
+        user.data,
+        '1h',
+      );
 
       return { ...user, access_token: accessToken };
     } catch (error) {
@@ -151,14 +149,11 @@ export class AuthService {
           user.userDevices.length == 0 &&
           user.allowedDeviceNumber > user._count.userDevices
         ) {
-          const payload = {
-            mobile: user.mobile,
-            sub: user.id,
-            mail: user.mail,
-            userId: user.id, 
-          };
-
-          const accessToken = this.jwtService.sign(payload);
+          const accessToken = this.tokenService.generateAccessToken(
+            user,
+            '20m',
+            'otp',
+          );
           return {
             code: 200,
             message:
