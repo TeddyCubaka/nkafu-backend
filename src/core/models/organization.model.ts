@@ -13,8 +13,8 @@ export class Organization extends BaseModel<'organization'> {
     { proprety: 'wallet.currency.formatKey', verbose: 'device' },
   ];
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'name', type: 'text' },
-    { proprety: 'photo', verbose: 'photo', type: 'text' },
+    { proprety: 'photo', verbose: 'photo', type: 'file' },
+    { proprety: 'name', verbose: 'name', type: 'text' }
   ];
 
   updateForm: InputType[] = [...this.createForm];
