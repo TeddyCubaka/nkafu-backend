@@ -249,4 +249,44 @@ export class AuthService {
       return formatPrismaError(error) as any;
     }
   }
+
+  async askForPasswordReset(userMail: string) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { mail: userMail },
+        select: { mobile: true, mail: true },
+      });
+
+      if (user == null)
+        return {
+          code: 404,
+          message: 'utilisateur introuvable',
+        };
+
+      const token = this.tokenService.generateAccessToken(
+        user,
+        '20m',
+        'renew_password',
+      );
+
+      const mailUtil = new MailUtil();
+      await mailUtil.sendMail(
+        user.mail,
+        'Changement de mot de passe',
+        `Cliquez sur ce lien pour changer votre mot de passe: <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/change-password/${token}">Changer mot de passe</a>`,
+      );
+
+      return {
+        code: 200,
+        message:
+          'Un lien de réinitialisation de mot de passe a été envoyé à votre adresse email',
+      };
+    } catch (error) {
+      return {
+        code: 400,
+        message: "Nous n'avons pas pu traiter votre demande",
+        error: error.message,
+      };
+    }
+  }
 }

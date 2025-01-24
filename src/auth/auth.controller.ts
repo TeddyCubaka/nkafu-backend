@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -88,6 +89,36 @@ export class AuthController {
     return { code: 200, message: 'Token is valid' };
   }
 
+  @Get('auth/password_reset')
+  askForPasswordRestHead(@Req() req: Request, @Res() res: Response) {
+    return res.json({
+      code: 200,
+      message: 'veuillez remplir ces informations',
+      data: [
+        {
+          proprety: 'mail',
+          verbose: 'adresse mail',
+          type: 'text',
+        },
+      ],
+    });
+  }
+
+  @Post('auth/password_reset')
+  async askForPasswordRest(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: { mail: string },
+  ) {
+    if ('mail' in body == false)
+      return res.status(400).json({
+        code: 400,
+        message: 'veuillez remplir toute les informations demandés',
+      });
+    const response = await this.authService.askForPasswordReset(body.mail);
+    return res.status(response.code).json(response);
+  }
+
   @Get('change/auth/password')
   @UseGuards(JwtAuthGuard)
   changePasswordHead() {
@@ -143,17 +174,23 @@ export class AuthController {
     return res.status(response.code).json(response);
   }
 
-  @Get('auth/otp/:method')
+  @Get('auth/otp')
   @UseGuards(JwtAuthGuard)
   async sendOtpToUser(
     @Req() request: Request,
-    @Param('method') method: 'sms' | 'email',
+    @Query('method') method: 'sms' | 'email',
     @Res() res: Response,
   ) {
     if (method !== 'sms' && method !== 'email')
       return res
         .status(400)
         .json({ code: 400, message: 'methode non supportée' });
+
+    if (request.user['type'] !== 'otp')
+      return res.status(200).json({
+        code: 400,
+        message: "Le token fourni n'est pas fait pour cette operation",
+      });
     const userId = request.user['userId'];
     const otpManager = new OTPManager();
 
