@@ -154,20 +154,36 @@ export class AuthService {
             '20m',
             'otp',
           );
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              userDevices: {
-                create: {
-                  deviceInnerId: userDevice.deviceInnerId,
-                  deviceType: userDevice.deviceType,
-                  os: userDevice.os,
-                  browser: userDevice.browser,
-                  ip: userDevice.ip,
+          const existingDevice = await prisma.userDevice.findFirst({
+            where: { deviceInnerId: userDevice.deviceInnerId, userId: user.id },
+          });
+
+          if (existingDevice !== null) {
+            await prisma.userDevice.update({
+              where: { id: existingDevice.id },
+              data: {
+                deviceType: userDevice.deviceType,
+                os: userDevice.os,
+                browser: userDevice.browser,
+                ip: userDevice.ip,
+              },
+            });
+          } else {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                userDevices: {
+                  create: {
+                    deviceInnerId: userDevice.deviceInnerId,
+                    deviceType: userDevice.deviceType,
+                    os: userDevice.os,
+                    browser: userDevice.browser,
+                    ip: userDevice.ip,
+                  },
                 },
               },
-            },
-          });
+            });
+          }
           return {
             code: 200,
             message:
@@ -254,7 +270,7 @@ export class AuthService {
     try {
       const user = await prisma.user.findUnique({
         where: { mail: userMail },
-        select: { mobile: true, mail: true },
+        select: { mobile: true, mail: true, id: true },
       });
 
       if (user == null)
@@ -264,7 +280,11 @@ export class AuthService {
         };
 
       const token = this.tokenService.generateAccessToken(
-        user,
+        {
+          mobile: user.mobile,
+          mail: user.mail,
+          id: user.id,
+        },
         '20m',
         'renew_password',
       );

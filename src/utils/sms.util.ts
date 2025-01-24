@@ -39,7 +39,7 @@ export class SmsUtil {
       const data = await response.json();
 
       if (!response.ok) {
-        // throw new Error('Network response was not ok');
+        console.error(data);
         return {
           code: 500,
           message: "Une erreur est survenue lors de l'envoi du SMS",
@@ -48,14 +48,13 @@ export class SmsUtil {
           },
         };
       }
-      return await {
+      return {
         code: 200,
         message: 'SMS envoyé avec succès',
         data: data,
       };
     } catch (err) {
       console.error(err);
-      // return Promise.reject(err);
       return {
         code: 500,
         message: "Une erreur est survenue lors de l'envoi du SMS",

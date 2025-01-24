@@ -22,12 +22,14 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserDevice } from 'src/types/userDevice.auth';
 import { OTPManager } from './utils/otpManager';
+import { TokenService } from 'src/utils/token';
 const useragent = require('useragent');
 
 @Controller('')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
     private utils: Utils,
   ) {}
 
@@ -186,7 +188,7 @@ export class AuthController {
         .status(400)
         .json({ code: 400, message: 'methode non supportée' });
 
-    if (request.user['type'] !== 'otp')
+    if (request.user['payload']['type'] !== 'otp')
       return res.status(200).json({
         code: 400,
         message: "Le token fourni n'est pas fait pour cette operation",
@@ -214,7 +216,7 @@ export class AuthController {
         },
       });
     }
-  }
+  } 
 
   @Post('auth/otp/validation')
   @UseGuards(JwtAuthGuard)
@@ -234,6 +236,21 @@ export class AuthController {
         body.otp,
         deviceInnerId,
       );
+      if (otpStatus.code === 200) {
+        const accessToken = this.tokenService.generateAccessToken(
+          {
+            mobile: otpStatus.data.mobile,
+            mail: otpStatus.data.mail,
+            id: otpStatus.data.id,
+          },
+          '3h',
+          'access',
+        );
+        return res.status(otpStatus.code).json({
+          ...otpStatus,
+          access_token: accessToken,
+        });
+      }
       return res.status(otpStatus.code).json(otpStatus);
     } catch (error) {
       return res.status(400).json({

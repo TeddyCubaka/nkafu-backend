@@ -32,7 +32,7 @@ export class OTPManager {
       /*
        * save the token into the user device and set the expiration time to 20 seconds
        */
-      data: { otp: +otp, otpExpireAt: new Date(Date.now() + 20000) },
+      data: { otp: +otp, otpExpireAt: new Date(Date.now() + 200000) },
     });
     return data;
   }
@@ -72,7 +72,8 @@ export class OTPManager {
         deviceInnerId,
       },
     });
-    if (userDevice) {
+    console.log(userDevice)
+    if (userDevice !== null) {
       let user = await prisma.user.update({
         where: {
           id: userId,

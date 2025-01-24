@@ -13,7 +13,11 @@ export class TokenService {
    * @returns Un token JWT signé
    */
   generateAccessToken(
-    user: any,
+    user: {
+      mobile: string;
+      mail: string;
+      id: string;
+    },
     expiresIn: string = '1h',
     type: 'access' | 'refresh' | 'otp' | 'renew_password' = 'access',
   ): string {
