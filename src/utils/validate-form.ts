@@ -93,9 +93,9 @@ export function validateForm(
             );
           }
           break;
-        case 'childrens':
-          if (Array.isArray(field.childrens)) {
-            const childErrors = validateForm(field.childrens, value || {});
+        case 'children':
+          if (Array.isArray(field.children)) {
+            const childErrors = validateForm(field.children, value || {});
             if (childErrors !== true && Array.isArray(childErrors)) {
               errors.push(...childErrors);
             }

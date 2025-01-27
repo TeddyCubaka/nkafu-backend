@@ -20,7 +20,7 @@ export class Recipe extends BaseModel<'recipe'> {
     { proprety: 'name', verbose: 'nom', type: 'text' },
     { proprety: 'description', verbose: 'description', type: 'text' },
     { proprety: 'generatingFact', verbose: 'fait générateur', type: 'text' },
-    { proprety: 'pricing', verbose: 'prix', type: 'number' },
+    { proprety: 'pricing', verbose: 'prix', type: 'number', isOptional: true },
     {
       proprety: 'currencyId',
       verbose: 'devise',

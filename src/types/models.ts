@@ -12,10 +12,11 @@ export type InputType = {
     | 'file'
     | 'float'
     | 'boolean'
-    | 'childrens';
+    | 'children';
   placeholder?: string;
   options?: Array<{ label: string; value: string | number }>;
   endpoint?: string;
-  childrens?: InputType[];
+  children?: InputType[];
   isOptional?: boolean;
+  multiple?: boolean;
 };

@@ -14,7 +14,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     never,
     DefaultArgs
   >;
-  protected model;
+  protected model: any;
 
   abstract listColumns: ColumnType[] | '*';
   abstract createForm: InputType[];

@@ -286,7 +286,7 @@ model Entity {
   updatedBy User? @relation("Entity-updatedBy", fields: [updatedByUserId], references: [id])
 
   parent     Entity?     @relation("entity-parent", references: [id], fields: [parentId])
-  childrens  Entity[]    @relation("entity-parent")
+  children   Entity[]    @relation("entity-parent")
   recipes    Recipe[]
   busStops   BusStop[]
   operations Operation[]
@@ -404,7 +404,7 @@ model Recipe {
   updatedBy User? @relation("Recipe-updatedBy", fields: [updatedByUserId], references: [id])
 
   parent         Recipe?         @relation("recipe-inner-relation", fields: [parentId], references: [id])
-  childrens      Recipe[]        @relation("recipe-inner-relation")
+  children       Recipe[]        @relation("recipe-inner-relation")
   operation      Operation[]
   activitySector ActivitySector? @relation(fields: [activitySectorId], references: [id])
   currency       Currency?       @relation(fields: [currencyId], references: [id])
