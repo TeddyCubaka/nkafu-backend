@@ -43,7 +43,7 @@ export class CoreController {
     const _queries = queriesUtils.toPrismaFilterMap(query);
 
     const _model = new config[modelName]();
-    const data = await _model
+    let data = await _model
       .find(_queries)
       .then((data) => ({
         code: 200,
@@ -62,12 +62,16 @@ export class CoreController {
         };
       });
 
-    return res.status(data.code).json({
-      ...data,
-      meta: {
-        listColumns: _model.listColumns,
-      },
-    });
+    if (data.code == 200) {
+      data = {
+        ...data,
+        meta: {
+          listColumns: _model.listColumns,
+        },
+      };
+    }
+
+    return res.status(data.code).json(data);
   }
 
   @Get('autocomplete/core/:model')

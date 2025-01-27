@@ -94,6 +94,8 @@ model User {
   BusStopUpdated            BusStop[]           @relation("BusStop-updatedBy")
   agentBusStopsCreated      AgentBusStop[]      @relation("AgentBusStop-createdBy")
   agentBusStopsUpdated      AgentBusStop[]      @relation("AgentBusStop-updatedBy")
+  UserDeviceCreated         UserDevice[]        @relation("UserDeviceCreatedBy")
+  UserDeviceUpdated         UserDevice[]        @relation("UserDeviceupdatedBy")
 }
 
 model UserDevice {
@@ -104,10 +106,19 @@ model UserDevice {
   os            String
   browser       String
   ip            String
-  createdAt     DateTime  @default(now())
   otp           Int?
   otpExpireAt   DateTime?
   isActive      Boolean   @default(false)
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  createdBy User? @relation("UserDeviceCreatedBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("UserDeviceupdatedBy", fields: [updatedByUserId], references: [id])
 
   user User @relation(fields: [userId], references: [id])
 }
