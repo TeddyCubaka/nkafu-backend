@@ -17,6 +17,12 @@ export class Entity extends BaseModel<'entity'> {
     { proprety: 'name', verbose: 'nom', type: 'text' },
     { proprety: 'description', verbose: 'description', type: 'text' },
     { proprety: 'abbreviation', verbose: 'abbreviation', type: 'text' },
+    {
+      proprety: 'enfants',
+      verbose: 'children',
+      type: 'children',
+      isOptional: true,
+    },
   ];
 
   updateForm: InputType[] = [

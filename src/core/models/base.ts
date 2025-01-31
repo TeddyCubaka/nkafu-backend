@@ -60,7 +60,8 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   async find(query?: any) {
-    query.select = { ...query.select, ...this.generateInclude() };
+    if ('include' in query == false)
+      query.select = { ...query.select, ...this.generateInclude() };
     query.where = { ...query['where'], isDeleted: false };
     query.orderBy = query.orderBy || { createdAt: { sort: 'desc' } };
     return this.model.findMany(query);

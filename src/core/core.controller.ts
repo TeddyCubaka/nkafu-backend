@@ -16,7 +16,10 @@ import { Request, Response } from 'express';
 import { coreConfig as config } from './models/core.model';
 import { QueriesUtils } from 'src/utils/query-to-prisma-params';
 import { formatPrismaError } from 'src/utils/format-prisma-error';
-import { validateForm } from 'src/utils/validate-form';
+import {
+  DataFormatter,
+  // validateForm
+} from 'src/utils/validate-form';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('')
@@ -104,51 +107,65 @@ export class CoreController {
     @Query() query: { [key: string]: any },
     @Body() body: Record<string, any>,
   ) {
-    const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
+    try {
+      const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
-    if (!(modelName in config)) {
-      return res.status(404).json({
-        code: 404,
-        message: 'ressource non trouvé dans le système',
+      if (!(modelName in config)) {
+        return res.status(404).json({
+          code: 404,
+          message: 'ressource non trouvé dans le système',
+        });
+      }
+      const queriesUtils = new QueriesUtils();
+      const _queries = queriesUtils.toPrismaFilterMap(query);
+      const _model = new config[modelName]();
+      const dataFormatter = new DataFormatter(req.user['userId']);
+      const validatedData = dataFormatter.formatData(body, _model.createForm);
+      // if (validationStatus !== true) {
+      //   return res.status(400).json({
+      //     code: 400,
+      //     message: 'la validation a echoue',
+      //     validationStatus,
+      //   });
+      // }
+
+      return res.status(200).json(validatedData || body);
+
+      const data = await _model
+        .create(
+          { ...validatedData, createdByUserId: req.user['userId'] },
+          _queries,
+        )
+        .then((data) => ({
+          code: 200,
+          message: `la création a réussie`,
+          data,
+        }))
+        .catch((error: any) => {
+          const formatedError = formatPrismaError(error);
+          return {
+            code: 400,
+            message: formatedError.message,
+            error: {
+              details: formatedError.details,
+              meta: formatedError.meta,
+            },
+          };
+        });
+
+      return res.status(data.code).json({
+        ...data,
+        // meta: {
+        //   listColumns: _model.listColumns,
+        // },
       });
-    }
-    const queriesUtils = new QueriesUtils();
-    const _queries = queriesUtils.toPrismaFilterMap(query);
-    const _model = new config[modelName]();
-    const validationStatus = validateForm(_model.createForm, body);
-    if (validationStatus !== true) {
+    } catch (error) {
       return res.status(400).json({
         code: 400,
-        message: 'la validation a echoue',
-        validationStatus,
+        message: error.message || "une erreur s'est produite",
+        data: body,
       });
     }
-
-    const data = await _model
-      .create({ ...body, createdByUserId: req.user['userId'] }, _queries)
-      .then((data) => ({
-        code: 200,
-        message: `la création a réussie`,
-        data,
-      }))
-      .catch((error: any) => {
-        const formatedError = formatPrismaError(error);
-        return {
-          code: 400,
-          message: formatedError.message,
-          error: {
-            details: formatedError.details,
-            meta: formatedError.meta,
-          },
-        };
-      });
-
-    return res.status(data.code).json({
-      ...data,
-      // meta: {
-      //   listColumns: _model.listColumns,
-      // },
-    });
   }
 
   @Patch('change/core/:model/:uuid')
@@ -161,55 +178,67 @@ export class CoreController {
     @Body() body: Record<string, any>,
     @Req() req: Request,
   ) {
-    const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
+    try {
+      const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
 
-    if (!(modelName in config)) {
-      return res.status(404).json({
-        code: 404,
-        message: 'ressource non trouvé dans le système',
-      });
-    }
-    const queriesUtils = new QueriesUtils();
-    const _queries = queriesUtils.toPrismaFilterMap(query);
-    const _model = new config[modelName]();
-    const validationStatus = validateForm(_model.updateForm, body);
-    if (validationStatus !== true) {
-      return res.status(200).json({
-        code: 400,
-        message: 'la validation a echoue',
-        validationStatus,
-      });
-    }
+      if (!(modelName in config)) {
+        return res.status(404).json({
+          code: 404,
+          message: 'ressource non trouvé dans le système',
+        });
+      }
+      const queriesUtils = new QueriesUtils();
+      const _queries = queriesUtils.toPrismaFilterMap(query);
+      const _model = new config[modelName]();
+      const dataFormatter = new DataFormatter(req.user['userId']);
+      const validationStatus = dataFormatter.formatData(
+        body,
+        _model.createForm,
+      );
 
-    const data = await _model
-      .updateById(
-        uuid,
-        { ...body, updatedByUserId: req.user['userId'] },
-        _queries,
-      )
-      .then((data) => {
-        if (data.code) return data;
-        return {
-          code: 200,
-          message: `mise à jour réussie`,
-          data,
-        };
-      })
-      .catch((error: any) => {
-        const formatedError = formatPrismaError(error);
-        return {
+      if (validationStatus !== true) {
+        return res.status(200).json({
           code: 400,
-          message: formatedError.message,
-          error: {
-            details: formatedError.details,
-            meta: formatedError.meta,
-          },
-        };
-      });
+          message: 'la validation a echoue',
+          validationStatus,
+        });
+      }
 
-    return res.status(data.code).json({
-      ...data,
-    });
+      const data = await _model
+        .updateById(
+          uuid,
+          { ...body, updatedByUserId: req.user['userId'] },
+          _queries,
+        )
+        .then((data) => {
+          if (data.code) return data;
+          return {
+            code: 200,
+            message: `mise à jour réussie`,
+            data,
+          };
+        })
+        .catch((error: any) => {
+          const formatedError = formatPrismaError(error);
+          return {
+            code: 400,
+            message: formatedError.message,
+            error: {
+              details: formatedError.details,
+              meta: formatedError.meta,
+            },
+          };
+        });
+
+      return res.status(data.code).json({
+        ...data,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        code: 400,
+        message: error.message || "une erreur s'est produite",
+      });
+    }
   }
 
   @Delete('delete/core/:model/:uuid')
