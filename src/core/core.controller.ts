@@ -121,15 +121,6 @@ export class CoreController {
       const _model = new config[modelName]();
       const dataFormatter = new DataFormatter(req.user['userId']);
       const validatedData = dataFormatter.formatData(body, _model.createForm);
-      // if (validationStatus !== true) {
-      //   return res.status(400).json({
-      //     code: 400,
-      //     message: 'la validation a echoue',
-      //     validationStatus,
-      //   });
-      // }
-
-      return res.status(200).json(validatedData || body);
 
       const data = await _model
         .create(
@@ -155,9 +146,6 @@ export class CoreController {
 
       return res.status(data.code).json({
         ...data,
-        // meta: {
-        //   listColumns: _model.listColumns,
-        // },
       });
     } catch (error) {
       return res.status(400).json({
@@ -191,23 +179,23 @@ export class CoreController {
       const _queries = queriesUtils.toPrismaFilterMap(query);
       const _model = new config[modelName]();
       const dataFormatter = new DataFormatter(req.user['userId']);
-      const validationStatus = dataFormatter.formatData(
+      const validatedData = dataFormatter.formatData(
         body,
-        _model.createForm,
+        _model.updateForm,
       );
 
-      if (validationStatus !== true) {
-        return res.status(200).json({
-          code: 400,
-          message: 'la validation a echoue',
-          validationStatus,
-        });
-      }
+      // if (validationStatus !== true) {
+      //   return res.status(200).json({
+      //     code: 400,
+      //     message: 'la validation a echoue',
+      //     validationStatus,
+      //   });
+      // }
 
       const data = await _model
         .updateById(
           uuid,
-          { ...body, updatedByUserId: req.user['userId'] },
+          { ...validatedData, updatedByUserId: req.user['userId'] },
           _queries,
         )
         .then((data) => {

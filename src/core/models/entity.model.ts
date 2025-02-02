@@ -18,8 +18,8 @@ export class Entity extends BaseModel<'entity'> {
     { proprety: 'description', verbose: 'description', type: 'text' },
     { proprety: 'abbreviation', verbose: 'abbreviation', type: 'text' },
     {
-      proprety: 'enfants',
-      verbose: 'children',
+      proprety: 'children',
+      verbose: 'entités enfants',
       type: 'children',
       isOptional: true,
     },
