@@ -72,7 +72,6 @@ export class OTPManager {
         deviceInnerId,
       },
     });
-    console.log(userDevice)
     if (userDevice !== null) {
       let user = await prisma.user.update({
         where: {

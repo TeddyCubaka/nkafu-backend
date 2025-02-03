@@ -6,6 +6,25 @@ export class Entity extends BaseModel<'entity'> {
     super('entity');
   }
 
+  defaultFindManyFilter = {
+    where: { parent: null },
+    include: {
+      children: {
+        include: {
+          children: {
+            include: {
+              children: {
+                include: {
+                  children: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
   listColumns: ColumnType[] = [
     { property: 'name', verbose: 'nom' },
     { property: 'description', verbose: 'description' },

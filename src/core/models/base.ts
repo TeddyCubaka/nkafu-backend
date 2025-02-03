@@ -59,8 +59,10 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     this.model = this.prisma[model];
   }
 
-  async find(query?: any) {
-    if ('include' in query == false)
+  async find(query: any) {
+    if (this.defaultFindManyFilter) {
+      query = this.defaultFindManyFilter;
+    } else if ('include' in query == false)
       query.select = { ...query.select, ...this.generateInclude() };
     query.where = { ...query['where'], isDeleted: false };
     query.orderBy = query.orderBy || { createdAt: { sort: 'desc' } };
