@@ -108,9 +108,10 @@ model Organization {
   isDeleted       Boolean?  @default(false)
   meta            Json      @default("{}")
 
-  createdBy User?  @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
-  updatedBy User?  @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
-  User      User[] @relation("user-organization")
+  createdBy    User?         @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
+  updatedBy    User?         @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
+  User         User[]        @relation("user-organization")
+  applications Application[]
 }
 
 model Action {
@@ -192,11 +193,12 @@ model UserPrivilege {
 }
 
 model Menu {
-  id        String  @id @unique @default(uuid())
-  icon      String?
-  name      String  @unique
-  path      String?
-  isDefault Boolean @default(false)
+  id            String  @id @unique @default(uuid())
+  icon          String?
+  name          String  @unique
+  path          String?
+  isDefault     Boolean @default(false)
+  applicationId String?
 
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt
@@ -204,6 +206,8 @@ model Menu {
   createdByUserId String?
   isDeleted       Boolean?  @default(false)
   meta            Json      @default("{}")
+
+  application Application? @relation(fields: [applicationId], references: [id])
 
   createdBy   User?        @relation("Menu-createdBy", fields: [createdByUserId], references: [id])
   updatedBy   User?        @relation("Menu-updatedBy", fields: [updatedByUserId], references: [id])
@@ -227,4 +231,22 @@ model MenuAction {
 
   menu   Menu   @relation(fields: [menuId], references: [id])
   action Action @relation(fields: [actionId], references: [id])
+}
+
+model Application {
+  id             String @id @unique @default(uuid())
+  icon           String
+  name           String
+  description    String
+  organizationId String
+
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+  updatedByUserId String?
+  createdByUserId String?
+  isDeleted       Boolean?  @default(false)
+  meta            Json      @default("{}")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  menus        Menu[]
 }

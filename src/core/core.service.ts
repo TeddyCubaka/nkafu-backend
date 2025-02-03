@@ -73,7 +73,7 @@ export class CoreService {
     processActions(user.userPrivileges);
 
     const profileMenu = await prisma.menu.findMany({
-      where: { name: 'profile' },
+      where: { name: 'profile', isDeleted: false },
       select: menuSelectOptions,
     });
 
@@ -111,6 +111,7 @@ export class CoreService {
     }
 
     const data = await prisma.menu.findMany({
+      where: { isDeleted: false },
       select: menuSelectOptions,
     });
 
@@ -194,7 +195,6 @@ export class CoreService {
           message: 'Utilisateur introuvable ou inactif.',
         };
       }
-
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques :', error);
       return {

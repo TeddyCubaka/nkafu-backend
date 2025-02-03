@@ -3,15 +3,16 @@ const prisma = new PrismaClient();
 
 const endponts = {
   core: [
-'user',
-'userDevice',
-'organization',
-'action',
-'role',
-'roleAction',
-'userPrivilege',
-'menu',
-'menuAction',
+    'user',
+    'userDevice',
+    'organization',
+    'action',
+    'role',
+    'roleAction',
+    'userPrivilege',
+    'menu',
+    'menuAction',
+    'application'
   ],
 };
 

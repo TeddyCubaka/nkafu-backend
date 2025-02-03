@@ -1,4 +1,5 @@
 import { Action } from './action.model';
+import { Application } from './application.model';
 import { Menu } from './menu.model';
 import { Organization } from './organization.model';
 import { Role } from './role.model';
@@ -13,4 +14,5 @@ export const coreConfig = {
   User,
   Organization,
   UserDevice,
+  Application,
 };
