@@ -25,6 +25,25 @@ export class Entity extends BaseModel<'entity'> {
     },
   };
 
+  defaultFindByIdFilter = {
+    where: { parent: null },
+    include: {
+      children: {
+        include: {
+          children: {
+            include: {
+              children: {
+                include: {
+                  children: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
   listColumns: ColumnType[] = [
     { property: 'name', verbose: 'nom' },
     { property: 'description', verbose: 'description' },

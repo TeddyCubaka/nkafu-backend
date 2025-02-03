@@ -70,6 +70,9 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
   }
 
   async findById(id: number | string, query?: any): Promise<any | null> {
+    if (this.defaultFindByIdFilter) {
+      query = this.defaultFindByIdFilter;
+    }
     query.where = { ...query['where'], id: id, isDeleted: false };
     return await this.postFindOne(
       await this.model.findUnique({
