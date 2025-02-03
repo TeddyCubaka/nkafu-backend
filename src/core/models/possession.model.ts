@@ -8,20 +8,20 @@ export class Possession extends BaseModel<'possession'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'uniqueNumber', verbose: 'ID unique' },
-    { proprety: 'type', verbose: 'type' },
-    { proprety: 'taxPayer.fullName', verbose: 'redevable' },
+    { property: 'uniqueNumber', verbose: 'ID unique' },
+    { property: 'type', verbose: 'type' },
+    { property: 'taxPayer.fullName', verbose: 'redevable' },
   ];
   createForm: InputType[] = [
-    { proprety: 'uniqueNumber', verbose: 'identifiant unique', type: 'text' },
+    { property: 'uniqueNumber', verbose: 'identifiant unique', type: 'text' },
     {
-      proprety: 'type',
+      property: 'type',
       verbose: 'type',
       type: 'select',
       options: [{ label: 'moto', value: 'MOTO' }],
     },
     {
-      proprety: 'taxPayerId',
+      property: 'taxPayerId',
       verbose: 'redevable',
       type: 'select',
       endpoint: 'autocomplete/core/taxPayer',

@@ -7,34 +7,34 @@ export class Recipe extends BaseModel<'recipe'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'pricing', verbose: 'prix' },
-    { proprety: 'currency.formatKey', verbose: 'devise monétaire' },
-    { proprety: 'entity.name', verbose: 'entité territoriale' },
-    { proprety: 'description', verbose: 'description' },
-    { proprety: 'recipeType', verbose: 'type' },
-    { proprety: 'generatingFact', verbose: 'fait générateur' },
-    { proprety: 'activitySector.name', verbose: "secteur d'activité" },
+    { property: 'name', verbose: 'nom' },
+    { property: 'pricing', verbose: 'prix' },
+    { property: 'currency.formatKey', verbose: 'devise monétaire' },
+    { property: 'entity.name', verbose: 'entité territoriale' },
+    { property: 'description', verbose: 'description' },
+    { property: 'recipeType', verbose: 'type' },
+    { property: 'generatingFact', verbose: 'fait générateur' },
+    { property: 'activitySector.name', verbose: "secteur d'activité" },
   ];
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'nom', type: 'text' },
-    { proprety: 'description', verbose: 'description', type: 'text' },
-    { proprety: 'generatingFact', verbose: 'fait générateur', type: 'text' },
-    { proprety: 'pricing', verbose: 'prix', type: 'number', isOptional: true },
+    { property: 'name', verbose: 'nom', type: 'text' },
+    { property: 'description', verbose: 'description', type: 'text' },
+    { property: 'generatingFact', verbose: 'fait générateur', type: 'text' },
+    { property: 'pricing', verbose: 'prix', type: 'number', isOptional: true },
     {
-      proprety: 'currencyId',
+      property: 'currencyId',
       verbose: 'devise',
       type: 'select',
       endpoint: 'autocomplete/core/currency',
     },
     {
-      proprety: 'entityId',
+      property: 'entityId',
       verbose: 'entité territoriale',
       type: 'select',
       endpoint: 'autocomplete/core/entity',
     },
     {
-      proprety: 'recipeType',
+      property: 'recipeType',
       verbose: 'type',
       type: 'select',
       options: [
@@ -44,7 +44,7 @@ export class Recipe extends BaseModel<'recipe'> {
       ],
     },
     {
-      proprety: 'activitySectorId',
+      property: 'activitySectorId',
       verbose: "secteur d'activité",
       type: 'select',
       endpoint: 'autocomplete/core/activitySector',

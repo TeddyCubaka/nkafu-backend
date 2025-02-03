@@ -9,6 +9,7 @@ import { formatPrismaError } from 'src/utils/format-prisma-error';
 import { UserDevice } from 'src/types/userDevice.auth';
 import { MailUtil } from 'src/utils/mail.util';
 import { TokenService } from 'src/utils/token';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -18,15 +19,44 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) {}
 
-  async login(reqBody: any, userDevice: UserDevice) {
+  // async login(reqBody: any, userDevice: UserDevice) {
+  //   try {
+  //     const user = await this.validateUser(
+  //       reqBody.identifier,
+  //       reqBody.password,
+  //       userDevice,
+  //     );
+
+  //     if (user.code >= 400 || 'data' in user == false) return user;
+  //     const accessToken = this.tokenService.generateAccessToken(
+  //       user.data,
+  //       '1h',
+  //     );
+
+  //     return { ...user, access_token: accessToken };
+  //   } catch (error) {
+  //     return {
+  //       code: 400,
+  //       message: error.message,
+  //     };
+  //   }
+  // }
+
+  async login(reqBody: any, request: Request) {
     try {
+      // Récupérez les informations du dispositif depuis l'objet `request`
+      const userDevice = request['device'];
+
+      // Validez l'utilisateur avec les informations du dispositif
       const user = await this.validateUser(
         reqBody.identifier,
         reqBody.password,
         userDevice,
       );
 
-      if (user.code >= 400 || 'data' in user == false) return user;
+      if (user.code >= 400 || !('data' in user)) return user;
+
+      // Générez un token d'accès
       const accessToken = this.tokenService.generateAccessToken(
         user.data,
         '1h',
@@ -40,6 +70,7 @@ export class AuthService {
       };
     }
   }
+
   async signup(user: SignupBodyInterface) {
     let verifyUser = await prisma.user.findFirst({
       where: { mobile: user.mobile },
@@ -90,7 +121,7 @@ export class AuthService {
   async validateUser(
     identifier: string,
     password: string,
-    userDevice: UserDevice,
+    userDevice: UserDevice | any,
   ) {
     try {
       let user = await prisma.user.findFirst({

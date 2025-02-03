@@ -7,16 +7,16 @@ export class Menu extends BaseModel<'menu'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'icon', verbose: 'icone' },
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'isDefault', verbose: 'ajouté par default' },
+    { property: 'icon', verbose: 'icone' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'isDefault', verbose: 'ajouté par default' },
   ];
 
   createForm: InputType[] = [
-    { proprety: 'icon', verbose: 'icone', type: 'text' },
-    { proprety: 'name', verbose: 'name', type: 'text' },
+    { property: 'icon', verbose: 'icone', type: 'text' },
+    { property: 'name', verbose: 'name', type: 'text' },
     {
-      proprety: 'menuActions',
+      property: 'menuActions',
       verbose: 'actions',
       type: 'multi-select',
       endpoint: 'autocomplete/core/action',

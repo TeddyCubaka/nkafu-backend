@@ -8,17 +8,17 @@ export class TaxPayer extends BaseModel<'taxPayer'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'uniqueId', verbose: 'ID unique' },
-    { proprety: 'fullName', verbose: 'nom complet' },
-    { proprety: 'mobile', verbose: 'téléphone' },
-    { proprety: 'type.name', verbose: 'type' },
-    { proprety: 'createdAt', verbose: 'créé le' },
+    { property: 'uniqueId', verbose: 'ID unique' },
+    { property: 'fullName', verbose: 'nom complet' },
+    { property: 'mobile', verbose: 'téléphone' },
+    { property: 'type.name', verbose: 'type' },
+    { property: 'createdAt', verbose: 'créé le' },
   ];
   createForm: InputType[] = [
-    { proprety: 'fullName', verbose: 'nom complet', type: 'text' },
-    { proprety: 'mobile', verbose: 'téléphone', type: 'text' },
+    { property: 'fullName', verbose: 'nom complet', type: 'text' },
+    { property: 'mobile', verbose: 'téléphone', type: 'text' },
     {
-      proprety: 'typeId',
+      property: 'typeId',
       verbose: 'type',
       type: 'select',
       endpoint: 'autocomplete/core/taxPayerType',

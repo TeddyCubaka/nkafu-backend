@@ -7,17 +7,17 @@ export class Currency extends BaseModel<'currency'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'formatKey', verbose: 'abréviation' },
-    { proprety: 'symbol', verbose: 'symbole' },
-    { proprety: 'exchangeRate', verbose: 'taux de change' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'formatKey', verbose: 'abréviation' },
+    { property: 'symbol', verbose: 'symbole' },
+    { property: 'exchangeRate', verbose: 'taux de change' },
   ];
 
   createForm: InputType[] = [
-    { verbose: 'nom', proprety: 'name', type: 'text' },
-    { verbose: 'symbole', proprety: 'symbol', type: 'text' },
-    { verbose: 'abréviation', proprety: 'formatKey', type: 'text' },
-    { verbose: 'taux de change', proprety: 'exchangeRate', type: 'number' },
+    { verbose: 'nom', property: 'name', type: 'text' },
+    { verbose: 'symbole', property: 'symbol', type: 'text' },
+    { verbose: 'abréviation', property: 'formatKey', type: 'text' },
+    { verbose: 'taux de change', property: 'exchangeRate', type: 'number' },
   ];
 
   updateForm: InputType[] = this.createForm;

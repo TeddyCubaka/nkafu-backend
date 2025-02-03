@@ -12,27 +12,27 @@ export class User extends BaseModel<'user'> {
   };
 
   listColumns: ColumnType[] = [
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'mail', verbose: 'adresse mail' },
-    { proprety: 'mobile', verbose: 'mobile' },
-    { proprety: 'isRoot', verbose: 'est root' },
-    { proprety: 'isActive', verbose: 'actif' },
-    { proprety: 'isStaff', verbose: 'est un staff' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'mail', verbose: 'adresse mail' },
+    { property: 'mobile', verbose: 'mobile' },
+    { property: 'isRoot', verbose: 'est root' },
+    { property: 'isActive', verbose: 'actif' },
+    { property: 'isStaff', verbose: 'est un staff' },
     {
-      proprety: 'mustRenewPassword',
+      property: 'mustRenewPassword',
       verbose: 'doit renouveller son mot de passe',
     },
-    { proprety: 'allowedDeviceNumber', verbose: 'nombre des devices max' },
-    { proprety: 'role.name', verbose: 'rôle' },
+    { property: 'allowedDeviceNumber', verbose: 'nombre des devices max' },
+    { property: 'role.name', verbose: 'rôle' },
   ];
 
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'name', type: 'text' },
-    { proprety: 'password', verbose: 'password', type: 'text' },
-    { proprety: 'mail', verbose: 'mail', type: 'text' },
-    { proprety: 'mobile', verbose: 'mobile', type: 'text' },
+    { property: 'name', verbose: 'name', type: 'text' },
+    { property: 'password', verbose: 'password', type: 'text' },
+    { property: 'mail', verbose: 'mail', type: 'text' },
+    { property: 'mobile', verbose: 'mobile', type: 'text' },
     {
-      proprety: 'isRoot',
+      property: 'isRoot',
       verbose: 'rendre super-utilisateur',
       type: 'select',
       options: [
@@ -41,7 +41,7 @@ export class User extends BaseModel<'user'> {
       ],
     },
     {
-      proprety: 'isActive',
+      property: 'isActive',
       verbose: 'rendre actif',
       type: 'select',
       options: [
@@ -50,7 +50,7 @@ export class User extends BaseModel<'user'> {
       ],
     },
     {
-      proprety: 'isStaff',
+      property: 'isStaff',
       verbose: 'rendre staff',
       type: 'select',
       options: [
@@ -59,19 +59,19 @@ export class User extends BaseModel<'user'> {
       ],
     },
     {
-      proprety: 'allowedDeviceNumber',
+      property: 'allowedDeviceNumber',
       verbose: 'nombre des devices max',
       type: 'number',
     },
     {
-      proprety: 'roleId',
+      property: 'roleId',
       verbose: 'roleId',
       type: 'select',
       endpoint: 'autocomplete/core/role',
       isOptional: true,
     },
     {
-      proprety: 'userPrivileges',
+      property: 'userPrivileges',
       verbose: 'privilège',
       type: 'multi-select',
       endpoint: 'autocomplete/core/action',
@@ -79,7 +79,7 @@ export class User extends BaseModel<'user'> {
   ];
 
   updateForm: InputType[] = [
-    ...this.createForm.filter((field) => field.proprety != 'password'),
+    ...this.createForm.filter((field) => field.property != 'password'),
   ];
 
   preCreateSave = async (data: Record<string, any>) => {

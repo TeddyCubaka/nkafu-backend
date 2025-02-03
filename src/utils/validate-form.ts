@@ -18,51 +18,51 @@ export class DataFormatter {
     const formattedData: any = {};
 
     for (const input of inputType) {
-      const { proprety, type, isOptional } = input;
+      const { property, type, isOptional } = input;
 
       // Vérifie si la clé existe dans les données
-      if (!(proprety in data)) {
+      if (!(property in data)) {
         if (isOptional) {
           continue; // Ignore les champs optionnels manquants
         } else {
-          throw new Error(`Le champ "${proprety}" est requis.`);
+          throw new Error(`Le champ "${property}" est requis.`);
         }
       }
 
-      const value = data[proprety];
+      const value = data[property];
 
       // Gestion des types de base
       switch (type) {
         case 'text':
-          formattedData[proprety] = this.convertToString(value, proprety);
+          formattedData[property] = this.convertToString(value, property);
           break;
         case 'number':
-          formattedData[proprety] = this.convertToNumber(value, proprety);
+          formattedData[property] = this.convertToNumber(value, property);
           break;
         case 'float':
-          formattedData[proprety] = this.convertToFloat(value, proprety);
+          formattedData[property] = this.convertToFloat(value, property);
           break;
         case 'boolean':
-          formattedData[proprety] = this.convertToBoolean(value, proprety);
+          formattedData[property] = this.convertToBoolean(value, property);
           break;
         case 'date':
-          formattedData[proprety] = this.convertToDate(value, proprety);
+          formattedData[property] = this.convertToDate(value, property);
           break;
         case 'select':
         case 'multi-select':
-          formattedData[proprety] = this.convertToSelect(
+          formattedData[property] = this.convertToSelect(
             value,
             input,
-            proprety,
+            property,
           );
           break;
         case 'children':
-          formattedData[proprety] = {
-            create: this.handleChildren(value, inputType, proprety),
+          formattedData[property] = {
+            create: this.handleChildren(value, inputType, property),
           };
           break;
         default:
-          throw new Error(`Type non supporté pour la clé "${proprety}".`);
+          throw new Error(`Type non supporté pour la clé "${property}".`);
       }
     }
 
@@ -186,9 +186,11 @@ export class DataFormatter {
       }
     } else if (input.type === 'multi-select') {
       if (
-        Array.isArray(value) &&
+        input.options &&
         value.every((v) => input.options?.some((opt) => opt.value === v))
       ) {
+        return value;
+      } else if (Array.isArray(value)) {
         return value;
       }
     }

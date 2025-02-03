@@ -7,14 +7,14 @@ export class Organization extends BaseModel<'organization'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'photo', verbose: 'photo' },
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'wallet.solde', verbose: 'Montant dans la caisse' },
-    { proprety: 'wallet.currency.formatKey', verbose: 'device' },
+    { property: 'photo', verbose: 'photo' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'wallet.solde', verbose: 'Montant dans la caisse' },
+    { property: 'wallet.currency.formatKey', verbose: 'device' },
   ];
   createForm: InputType[] = [
-    { proprety: 'photo', verbose: 'photo', type: 'file' },
-    { proprety: 'name', verbose: 'name', type: 'text' }
+    { property: 'photo', verbose: 'photo', type: 'file' },
+    { property: 'name', verbose: 'name', type: 'text' }
   ];
 
   updateForm: InputType[] = [...this.createForm];

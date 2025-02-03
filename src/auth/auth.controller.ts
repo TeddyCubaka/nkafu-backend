@@ -18,7 +18,10 @@ import {
 } from './interfaces/signup-payload';
 import { Utils } from 'src/utils/utils';
 import { Request, Response } from 'express';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import {
+  LocalStrategy,
+  // LocalAuthGuard
+} from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserDevice } from 'src/types/userDevice.auth';
 import { OTPManager } from './utils/otpManager';
@@ -50,8 +53,29 @@ export class AuthController {
     return hash.toString(16);
   }
 
+  // @Post('auth/login')
+  // @UseGuards(LocalAuthGuard)
+  // async login(
+  //   @Body() body: LoginInterface,
+  //   @Req() request: Request,
+  //   @Res() res: Response,
+  // ) {
+  //   const agent = useragent.parse(request.headers['user-agent']);
+
+  //   const deviceData: UserDevice = {
+  //     deviceInnerId: this.generateDeviceInnerId(agent),
+  //     deviceType: agent.device.family || 'unknown',
+  //     os: `${agent.os.family} ${agent.os.major}`,
+  //     browser: `${agent.family} ${agent.major}`,
+  //     ip: request.ip || String(request.headers['x-forwarded-for']) || '0.0.0.0',
+  //   };
+
+  //   const data = await this.authService.login(body, deviceData);
+  //   return res.status(data.code).json(data);
+  // }
+
   @Post('auth/login')
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(LocalStrategy)
   async login(
     @Body() body: LoginInterface,
     @Req() request: Request,
@@ -59,7 +83,8 @@ export class AuthController {
   ) {
     const agent = useragent.parse(request.headers['user-agent']);
 
-    const deviceData: UserDevice = {
+    // Ajoutez les informations du dispositif à l'objet `request`
+    request['device'] = {
       deviceInnerId: this.generateDeviceInnerId(agent),
       deviceType: agent.device.family || 'unknown',
       os: `${agent.os.family} ${agent.os.major}`,
@@ -67,7 +92,8 @@ export class AuthController {
       ip: request.ip || String(request.headers['x-forwarded-for']) || '0.0.0.0',
     };
 
-    const data = await this.authService.login(body, deviceData);
+    // Appelez le service en passant le corps de la requête et l'objet `request`
+    const data = await this.authService.login(body, request);
     return res.status(data.code).json(data);
   }
 
@@ -98,7 +124,7 @@ export class AuthController {
       message: 'veuillez remplir ces informations',
       data: [
         {
-          proprety: 'mail',
+          property: 'mail',
           verbose: 'adresse mail',
           type: 'text',
         },
@@ -129,17 +155,17 @@ export class AuthController {
       message: 'veuillez remplir ces informations',
       data: [
         {
-          proprety: 'currentPassword',
+          property: 'currentPassword',
           verbose: 'actuel mot de passe',
           type: 'text',
         },
         {
-          proprety: 'newPassword',
+          property: 'newPassword',
           verbose: 'nouveau mot de passe',
           type: 'text',
         },
         {
-          proprety: 'confirmNewPassword',
+          property: 'confirmNewPassword',
           verbose: 'confirmation du nouveau mot de passe',
           type: 'text',
         },
@@ -216,7 +242,7 @@ export class AuthController {
         },
       });
     }
-  } 
+  }
 
   @Post('auth/otp/validation')
   @UseGuards(JwtAuthGuard)

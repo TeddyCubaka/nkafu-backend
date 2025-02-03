@@ -7,13 +7,13 @@ export class BusStop extends BaseModel<'busStop'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'entity', verbose: 'entité territoriale' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'entity', verbose: 'entité territoriale' },
   ];
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'nom', type: 'text' },
+    { property: 'name', verbose: 'nom', type: 'text' },
     {
-      proprety: 'entityId',
+      property: 'entityId',
       verbose: 'entité territoriale',
       type: 'select',
       endpoint: 'autocomplete/core/entity',

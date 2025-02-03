@@ -4,7 +4,7 @@ import { prisma } from 'prisma/lib/prisma';
 import { InputType } from 'src/types/models';
 
 export type ColumnType = {
-  proprety: string;
+  property: string;
   verbose: string;
 };
 
@@ -117,7 +117,7 @@ export abstract class BaseModel<T extends keyof PrismaClient> {
     const select: Record<string, any> = { id: true };
     if (this.listColumns == '*') return {};
     this.listColumns.forEach((column) => {
-      const keys = column.proprety.split('.');
+      const keys = column.property.split('.');
       let currentLevel = select;
 
       keys.forEach((key, index) => {

@@ -10,17 +10,17 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'agent.firstName', verbose: 'agent' },
-    { proprety: 'amount', verbose: 'montant' },
-    { proprety: 'wallet.currency.formatKey', verbose: 'device' },
-    { proprety: 'startAt', verbose: 'debut' },
-    { proprety: 'endAt', verbose: 'fin' },
-    { proprety: 'status', verbose: 'statut' },
-    { proprety: 'validatedByAgent.firstName', verbose: 'clôoturé par' },
+    { property: 'agent.firstName', verbose: 'agent' },
+    { property: 'amount', verbose: 'montant' },
+    { property: 'wallet.currency.formatKey', verbose: 'device' },
+    { property: 'startAt', verbose: 'debut' },
+    { property: 'endAt', verbose: 'fin' },
+    { property: 'status', verbose: 'statut' },
+    { property: 'validatedByAgent.firstName', verbose: 'clôoturé par' },
   ];
   createForm: InputType[] = [
     {
-      proprety: 'confirmation',
+      property: 'confirmation',
       verbose: 'Voulez-vous faire une liquidation ?',
       type: 'select',
       options: [
@@ -32,7 +32,7 @@ export class WalletLiquidation extends BaseModel<'walletLiquidation'> {
 
   updateForm: InputType[] = [
     {
-      proprety: 'confirmation',
+      property: 'confirmation',
       verbose: 'Valider la liquidation ?',
       type: 'select',
       options: [

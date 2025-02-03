@@ -7,18 +7,18 @@ export class Entity extends BaseModel<'entity'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'description', verbose: 'description' },
-    { proprety: 'abbreviation', verbose: 'abbreviation' },
-    { proprety: 'isActive', verbose: 'est actif' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'description', verbose: 'description' },
+    { property: 'abbreviation', verbose: 'abbreviation' },
+    { property: 'isActive', verbose: 'est actif' },
   ];
 
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'nom', type: 'text' },
-    { proprety: 'description', verbose: 'description', type: 'text' },
-    { proprety: 'abbreviation', verbose: 'abbreviation', type: 'text' },
+    { property: 'name', verbose: 'nom', type: 'text' },
+    { property: 'description', verbose: 'description', type: 'text' },
+    { property: 'abbreviation', verbose: 'abbreviation', type: 'text' },
     {
-      proprety: 'children',
+      property: 'children',
       verbose: 'entités enfants',
       type: 'children',
       isOptional: true,
@@ -27,7 +27,7 @@ export class Entity extends BaseModel<'entity'> {
 
   updateForm: InputType[] = [
     ...this.createForm,
-    { proprety: 'isActive', verbose: 'est actif', type: 'boolean' },
+    { property: 'isActive', verbose: 'est actif', type: 'boolean' },
   ];
 
   autocompleteData: (data: any[]) => {

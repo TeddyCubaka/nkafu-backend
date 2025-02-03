@@ -7,13 +7,13 @@ export class Role extends BaseModel<'role'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'id', verbose: 'pk' },
-    { proprety: 'name', verbose: 'nom' },
+    { property: 'id', verbose: 'pk' },
+    { property: 'name', verbose: 'nom' },
   ];
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'name', type: 'text' },
+    { property: 'name', verbose: 'name', type: 'text' },
     {
-      proprety: 'roleActions',
+      property: 'roleActions',
       verbose: 'permissions',
       type: 'multi-select',
       endpoint: 'autocomplete/core/action',

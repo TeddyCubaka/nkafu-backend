@@ -9,20 +9,20 @@ export class Wallet extends BaseModel<'wallet'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'agent.firstName', verbose: 'agent' },
-    { proprety: 'solde', verbose: 'solde' },
-    { proprety: 'currency.formatKey', verbose: 'device' },
-    { proprety: 'canBeNegative', verbose: 'peut-être infrieur a zero' },
+    { property: 'agent.firstName', verbose: 'agent' },
+    { property: 'solde', verbose: 'solde' },
+    { property: 'currency.formatKey', verbose: 'device' },
+    { property: 'canBeNegative', verbose: 'peut-être infrieur a zero' },
   ];
   createForm: InputType[] = [
     {
-      proprety: 'agentId',
+      property: 'agentId',
       verbose: 'agent',
       type: 'select',
       endpoint: 'autocomplete/core/agent',
     },
     {
-      proprety: 'currencyId',
+      property: 'currencyId',
       verbose: 'device',
       type: 'select',
       endpoint: 'autocomplete/core/currency',

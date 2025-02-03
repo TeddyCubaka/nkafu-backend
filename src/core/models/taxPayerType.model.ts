@@ -7,17 +7,17 @@ export class TaxPayerType extends BaseModel<'taxPayerType'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'isActive', verbose: 'activé' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'isActive', verbose: 'activé' },
   ];
 
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'nom', type: 'text' },
-    { proprety: 'isActive', verbose: 'activé', type: 'boolean' },
+    { property: 'name', verbose: 'nom', type: 'text' },
+    { property: 'isActive', verbose: 'activé', type: 'boolean' },
   ];
 
   updateForm: InputType[] = [
-    ...this.createForm.filter((field) => field.proprety != 'password'),
+    ...this.createForm.filter((field) => field.property != 'password'),
   ];
 
   autocompleteData: (data: any[]) => {

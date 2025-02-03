@@ -7,17 +7,17 @@ export class ActivitySector extends BaseModel<'activitySector'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'description', verbose: 'description' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'description', verbose: 'description' },
   ];
 
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'nom', type: 'text' },
-    { proprety: 'description', verbose: 'description', type: 'text' },
+    { property: 'name', verbose: 'nom', type: 'text' },
+    { property: 'description', verbose: 'description', type: 'text' },
   ];
 
   updateForm: InputType[] = [
-    ...this.createForm.filter((field) => field.proprety != 'password'),
+    ...this.createForm.filter((field) => field.property != 'password'),
   ];
 
   autocompleteData: (data: any[]) => {

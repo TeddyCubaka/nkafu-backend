@@ -7,15 +7,15 @@ export class Action extends BaseModel<'action'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'name', verbose: 'nom' },
-    { proprety: 'path', verbose: 'path' },
-    { proprety: 'method', verbose: 'methode' },
+    { property: 'name', verbose: 'nom' },
+    { property: 'path', verbose: 'path' },
+    { property: 'method', verbose: 'methode' },
   ];
   createForm: InputType[] = [
-    { proprety: 'name', verbose: 'name', type: 'text' },
-    { proprety: 'path', verbose: 'path', type: 'text' },
+    { property: 'name', verbose: 'name', type: 'text' },
+    { property: 'path', verbose: 'path', type: 'text' },
     {
-      proprety: 'method',
+      property: 'method',
       verbose: 'method',
       type: 'select',
       options: [

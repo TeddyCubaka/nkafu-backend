@@ -7,21 +7,21 @@ export class AgentBusStop extends BaseModel<'agentBusStop'> {
   }
 
   listColumns: ColumnType[] = [
-    { proprety: 'agent.firstName', verbose: "nom de l'agent" },
-    { proprety: 'agent.lastName', verbose: "post-nom de l'agent" },
-    { proprety: 'busStop.id', verbose: 'id' },
-    { proprety: 'busStop.name', verbose: 'parking' },
-    { proprety: 'busStop.entity.name', verbose: 'entité du parking' },
+    { property: 'agent.firstName', verbose: "nom de l'agent" },
+    { property: 'agent.lastName', verbose: "post-nom de l'agent" },
+    { property: 'busStop.id', verbose: 'id' },
+    { property: 'busStop.name', verbose: 'parking' },
+    { property: 'busStop.entity.name', verbose: 'entité du parking' },
   ];
   createForm: InputType[] = [
     {
-      proprety: 'agentId',
+      property: 'agentId',
       verbose: 'name',
       type: 'select',
       endpoint: 'autocomplete/core/agent',
     },
     {
-      proprety: 'busStopId',
+      property: 'busStopId',
       verbose: 'path',
       type: 'select',
       endpoint: 'autocomplete/core/busStop',
