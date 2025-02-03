@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -31,11 +31,11 @@ const menuData: {
   },
 ];
 
-async function Saver() {
-  const menus = [];
-  for (const menu of menuData) {
-    let savedMenu = await prisma.menu
-      .upsert({
+async function saver() {
+  try {
+    for (const menu of menuData) {
+      // Upsert the menu
+      const savedMenu = await prisma.menu.upsert({
         where: { name: menu.name },
         update: {
           isDefault: true,
@@ -49,19 +49,19 @@ async function Saver() {
           name: menu.name,
           path: menu.path,
         },
-      })
-      .then((data) => data)
-      .catch((err) => null);
-    if (savedMenu == null) return;
-    await prisma.menuAction.deleteMany({ where: { menuId: savedMenu.id } });
-    const actions = menu.actions.map(async (path) => {
-      let action = await prisma.action.findUnique({
-        where: {
-          name: `${path.split('/')[path.split('/').length - 1]}`,
-        },
       });
-      if (action == null) {
-        action = await prisma.action.upsert({
+
+      console.log(savedMenu.name);
+
+      // Delete existing menu actions
+      await prisma.menuAction.deleteMany({ where: { menuId: savedMenu.id } });
+
+      // Create new menu actions
+      for (const path of menu.actions) {
+        const actionName = path.split('/').pop() || '';
+
+        // Upsert the action
+        const action = await prisma.action.upsert({
           where: {
             path_method: {
               path: path,
@@ -69,24 +69,31 @@ async function Saver() {
             },
           },
           update: {
-            name: `${path.split('/')[path.split('/').length - 1]}`,
+            name: actionName,
           },
           create: {
-            name: `${path.split('/')[path.split('/').length - 1]}`,
+            name: actionName,
             path: path,
             method: 'GET',
           },
         });
+
+        // Create the menu action
+        await prisma.menuAction.create({
+          data: {
+            menu: { connect: { id: savedMenu.id } },
+            action: { connect: { id: action.id } },
+          },
+        });
       }
-      return await prisma.menuAction.create({
-        data: {
-          menu: { connect: { id: savedMenu.id } },
-          action: { connect: { id: action.id } },
-        },
-      });
-    });
-    menus.push({ ...savedMenu, actions: actions });
+    }
+
+    console.log('Menus and actions saved successfully.');
+  } catch (error) {
+    console.error('Error saving menus and actions:', error);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-Saver();
+saver();
