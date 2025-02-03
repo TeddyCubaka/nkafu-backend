@@ -1,9 +1,3 @@
-// import { Injectable } from '@nestjs/common';
-// import { AuthGuard } from '@nestjs/passport';
-
-// @Injectable()
-// export class LocalAuthGuard extends AuthGuard('local') {}
-
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';

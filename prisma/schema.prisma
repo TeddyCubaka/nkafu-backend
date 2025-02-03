@@ -49,53 +49,24 @@ model User {
   role Role? @relation("user-role", references: [id], fields: [roleId])
 
   userPrivileges UserPrivilege[] @relation("User-Privilege")
-  agent          Agent?          @relation("agent-account")
   userDevices    UserDevice[]
 
-  organizationsCreated      Organization[]      @relation("OrganizationCreatedBy")
-  organizationsUpdated      Organization[]      @relation("OrganizationupdatedBy")
-  actionsCreated            Action[]            @relation("Action-CreatedBy")
-  actionsUpdated            Action[]            @relation("Action-updatedBy")
-  rolesCreated              Role[]              @relation("Role-CreatedBy")
-  rolesUpdated              Role[]              @relation("Role-updatedBy")
-  roleActionsCreated        RoleAction[]        @relation("RoleAction-createdBy")
-  roleActionsUpdated        RoleAction[]        @relation("RoleAction-updatedBy")
-  userPrivilegesCreated     UserPrivilege[]     @relation("UserPrivilege-createdBy")
-  userPrivilegesUpdated     UserPrivilege[]     @relation("UserPrivilege-updatedBy")
-  menusCreated              Menu[]              @relation("Menu-createdBy")
-  menusUpdated              Menu[]              @relation("Menu-updatedBy")
-  menuActionsCreated        MenuAction[]        @relation("MenuAction-createdBy")
-  menuActionsUpdated        MenuAction[]        @relation("MenuAction-updatedBy")
-  entitiesCreated           Entity[]            @relation("Entity-createdBy")
-  entitiesUpdated           Entity[]            @relation("Entity-updatedBy")
-  agentCreated              Agent[]             @relation("Agent-createdBy")
-  agentUpdated              Agent[]             @relation("Agent-updatedBy")
-  currenciesCreated         Currency[]          @relation("Currency-createdBy")
-  currenciesUpdated         Currency[]          @relation("Currency-updatedBy")
-  walletCreated             Wallet[]            @relation("Wallet-createdBy")
-  walletUpdated             Wallet[]            @relation("Wallet-updatedBy")
-  recipesCreated            Recipe[]            @relation("Recipe-createdBy")
-  recipesUpdated            Recipe[]            @relation("Recipe-updatedBy")
-  taxPayersTypesCreated     TaxPayerType[]      @relation("TaxPayerType-createdBy")
-  taxPayersTypesUpdated     TaxPayerType[]      @relation("TaxPayerType-updatedBy")
-  taxPayersCreated          TaxPayer[]          @relation("TaxPayer-createdBy")
-  taxPayersUpdated          TaxPayer[]          @relation("TaxPayer-updatedBy")
-  possessionsCreated        Possession[]        @relation("Possession-createdBy")
-  possessionsUpdated        Possession[]        @relation("Possession-updatedBy")
-  operationsCreated         Operation[]         @relation("Operation-createdBy")
-  operationsUpdated         Operation[]         @relation("Operation-updatedBy")
-  transactionsCreated       Transaction[]       @relation("Operation-createdBy")
-  transactionsUpdated       Transaction[]       @relation("Operation-updatedBy")
-  walletLiquidationsCreated WalletLiquidation[] @relation("WalletLiquidation-createdBy")
-  walletLiquidationsUpdated WalletLiquidation[] @relation("WalletLiquidation-updatedBy")
-  activitySectorsCreated    ActivitySector[]    @relation("ActivitySector-createdBy")
-  activitySectorsUpdated    ActivitySector[]    @relation("ActivitySector-updatedBy")
-  BusStopCreated            BusStop[]           @relation("BusStop-createdBy")
-  BusStopUpdated            BusStop[]           @relation("BusStop-updatedBy")
-  agentBusStopsCreated      AgentBusStop[]      @relation("AgentBusStop-createdBy")
-  agentBusStopsUpdated      AgentBusStop[]      @relation("AgentBusStop-updatedBy")
-  UserDeviceCreated         UserDevice[]        @relation("UserDeviceCreatedBy")
-  UserDeviceUpdated         UserDevice[]        @relation("UserDeviceupdatedBy")
+  organizationsCreated  Organization[]  @relation("OrganizationCreatedBy")
+  organizationsUpdated  Organization[]  @relation("OrganizationupdatedBy")
+  actionsCreated        Action[]        @relation("Action-CreatedBy")
+  actionsUpdated        Action[]        @relation("Action-updatedBy")
+  rolesCreated          Role[]          @relation("Role-CreatedBy")
+  rolesUpdated          Role[]          @relation("Role-updatedBy")
+  roleActionsCreated    RoleAction[]    @relation("RoleAction-createdBy")
+  roleActionsUpdated    RoleAction[]    @relation("RoleAction-updatedBy")
+  userPrivilegesCreated UserPrivilege[] @relation("UserPrivilege-createdBy")
+  userPrivilegesUpdated UserPrivilege[] @relation("UserPrivilege-updatedBy")
+  menusCreated          Menu[]          @relation("Menu-createdBy")
+  menusUpdated          Menu[]          @relation("Menu-updatedBy")
+  menuActionsCreated    MenuAction[]    @relation("MenuAction-createdBy")
+  menuActionsUpdated    MenuAction[]    @relation("MenuAction-updatedBy")
+  UserDeviceCreated     UserDevice[]    @relation("UserDeviceCreatedBy")
+  UserDeviceUpdated     UserDevice[]    @relation("UserDeviceupdatedBy")
 }
 
 model UserDevice {
@@ -124,10 +95,9 @@ model UserDevice {
 }
 
 model Organization {
-  id       String  @id @unique @default(uuid())
-  name     String  @unique
-  photo    String
-  walletId String? @unique
+  id    String @id @unique @default(uuid())
+  name  String @unique
+  photo String
 
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt
@@ -136,11 +106,8 @@ model Organization {
   isDeleted       Boolean?  @default(false)
   meta            Json      @default("{}")
 
-  createdBy  User?       @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
-  updatedBy  User?       @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
-  operations Operation[]
-  agents     Agent[]
-  wallet     Wallet?     @relation("organization-wallet", fields: [walletId], references: [id])
+  createdBy User? @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
+  updatedBy User? @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
 }
 
 model Action {
@@ -257,373 +224,4 @@ model MenuAction {
 
   menu   Menu   @relation(fields: [menuId], references: [id])
   action Action @relation(fields: [actionId], references: [id])
-}
-
-enum NamedEntity {
-  PROVINCE
-  VILLE
-  COMMUNE
-  QUARTIER
-}
-
-model Entity {
-  id           String  @id @unique @default(uuid())
-  name         String  @unique()
-  description  String
-  abbreviation String?
-  parentId     String?
-
-  isActive Boolean? @default(true)
-
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  updatedByUserId String?
-  createdByUserId String?
-  isDeleted       Boolean?  @default(false)
-  meta            Json      @default("{}")
-
-  createdBy User? @relation("Entity-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("Entity-updatedBy", fields: [updatedByUserId], references: [id])
-
-  parent     Entity?     @relation("entity-parent", references: [id], fields: [parentId])
-  children   Entity[]    @relation("entity-parent")
-  recipes    Recipe[]
-  busStops   BusStop[]
-  operations Operation[]
-  agents     Agent[]
-}
-
-model Agent {
-  id             String  @id @unique @default(uuid())
-  firstName      String
-  middleName     String?
-  lastName       String
-  mobile         String  @unique
-  mail           String? @unique
-  address        String
-  organizationId String?
-  userId         String? @unique
-  entityId       String?
-
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  updatedByUserId String?
-  createdByUserId String?
-  isDeleted       Boolean?  @default(false)
-  meta            Json      @default("{}")
-
-  createdBy User? @relation("Agent-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("Agent-updatedBy", fields: [updatedByUserId], references: [id])
-
-  user         User?         @relation("agent-account", fields: [userId], references: [id])
-  organization Organization? @relation(fields: [organizationId], references: [id])
-  entity       Entity?       @relation(fields: [entityId], references: [id])
-
-  wallets                Wallet[]
-  operationInitializated Operation[]         @relation("operation-initByAgent")
-  operationClosed        Operation[]         @relation("operation-closedByAgent")
-  agentBusStops          AgentBusStop[]
-  liquidations           WalletLiquidation[] @relation("AgentId-agent")
-  validatedLiquidations  WalletLiquidation[] @relation("validatedByAgentId-agent")
-}
-
-model Currency {
-  id           String @id @unique @default(uuid())
-  name         String
-  symbol       String @unique
-  formatKey    String @unique
-  exchangeRate Int
-
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  updatedByUserId String?
-  createdByUserId String?
-  isDeleted       Boolean?  @default(false)
-  meta            Json      @default("{}")
-
-  createdBy User? @relation("Currency-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("Currency-updatedBy", fields: [updatedByUserId], references: [id])
-
-  wallets Wallet[]
-  recipes Recipe[]
-}
-
-model Wallet {
-  id         String  @id @unique @default(uuid())
-  solde      Float   @default(0)
-  agentId    String?
-  currencyId String
-
-  canBeNegative Boolean @default(false)
-
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  updatedByUserId String?
-  createdByUserId String?
-  isDeleted       Boolean?  @default(false)
-  meta            Json      @default("{}")
-
-  createdBy User? @relation("Wallet-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("Wallet-updatedBy", fields: [updatedByUserId], references: [id])
-
-  agent              Agent?              @relation(fields: [agentId], references: [id])
-  currency           Currency            @relation(fields: [currencyId], references: [id])
-  transactions       Transaction[]
-  walletLiquidations WalletLiquidation[]
-  organization       Organization?       @relation("organization-wallet")
-}
-
-enum RecipeType {
-  TAX
-  IMPOT
-  REDEVANCE
-}
-
-model Recipe {
-  id               String     @id @unique @default(uuid())
-  name             String
-  pricing          Int
-  parentId         String?
-  entityId         String?
-  currencyId       String?
-  description      String
-  recipeType       RecipeType
-  generatingFact   String?
-  activitySectorId String?
-
-  isActive Boolean @default(true)
-
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  updatedByUserId String?
-  createdByUserId String?
-  isDeleted       Boolean?  @default(false)
-  meta            Json      @default("{}")
-
-  createdBy User? @relation("Recipe-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("Recipe-updatedBy", fields: [updatedByUserId], references: [id])
-
-  parent         Recipe?         @relation("recipe-inner-relation", fields: [parentId], references: [id])
-  children       Recipe[]        @relation("recipe-inner-relation")
-  operation      Operation[]
-  activitySector ActivitySector? @relation(fields: [activitySectorId], references: [id])
-  currency       Currency?       @relation(fields: [currencyId], references: [id])
-  entity         Entity?         @relation(fields: [entityId], references: [id])
-}
-
-model TaxPayerType {
-  id       String  @id @unique @default(uuid())
-  name     String
-  isActive Boolean @default(false)
-
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  updatedByUserId String?
-  createdByUserId String?
-  isDeleted       Boolean?  @default(false)
-  meta            Json      @default("{}")
-
-  createdBy User? @relation("TaxPayerType-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("TaxPayerType-updatedBy", fields: [updatedByUserId], references: [id])
-
-  TaxPayer TaxPayer[]
-}
-
-model TaxPayer {
-  id       String  @id @unique @default(uuid())
-  fullName String
-  mobile   String
-  uniqueId String  @unique
-  typeId   String?
-
-  type TaxPayerType? @relation(fields: [typeId], references: [id])
-
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  updatedByUserId String?
-  createdByUserId String?
-  isDeleted       Boolean?  @default(false)
-  meta            Json      @default("{}")
-
-  createdBy User? @relation("TaxPayer-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("TaxPayer-updatedBy", fields: [updatedByUserId], references: [id])
-
-  possessions Possession[]
-}
-
-enum PossessionType {
-  MOTO
-}
-
-model Possession {
-  id           String         @id @unique @default(uuid())
-  uniqueNumber String         @unique
-  type         PossessionType
-  taxPayerId   String
-
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  updatedByUserId String?
-  createdByUserId String?
-  isDeleted       Boolean?  @default(false)
-  meta            Json      @default("{}")
-
-  createdBy User? @relation("Possession-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("Possession-updatedBy", fields: [updatedByUserId], references: [id])
-
-  taxPayer   TaxPayer    @relation(fields: [taxPayerId], references: [id])
-  operations Operation[]
-}
-
-enum OperationAction {
-  TAXATION
-  LIQUIDATION
-}
-
-model Operation {
-  id              String  @id @unique @default(uuid())
-  recipeId        String?
-  possessionId    String?
-  initByAgentId   String
-  organizationId  String
-  closedByAgentId String?
-  entityId        String?
-  busStopId       String?
-
-  status         OperationStatus
-  paiementStatus PaiementStatus
-  action         OperationAction? @default(TAXATION)
-
-  totalAmount Float
-  paiedAmount Float
-
-  isClosed Boolean
-
-  meta            Json      @default("{}")
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  isDeleted       Boolean?  @default(false)
-  updatedByUserId String?
-  createdByUserId String?
-
-  createdBy User? @relation("Operation-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("Operation-updatedBy", fields: [updatedByUserId], references: [id])
-
-  recipe        Recipe?       @relation(fields: [recipeId], references: [id])
-  possession    Possession?   @relation(fields: [possessionId], references: [id])
-  initByAgent   Agent         @relation("operation-initByAgent", fields: [initByAgentId], references: [id])
-  organization  Organization  @relation(fields: [organizationId], references: [id])
-  closedByAgent Agent?        @relation("operation-closedByAgent", fields: [closedByAgentId], references: [id])
-  entity        Entity?       @relation(fields: [entityId], references: [id])
-  busStop       BusStop?      @relation(fields: [busStopId], references: [id])
-  transactions  Transaction[]
-}
-
-model Transaction {
-  id          String  @id @unique @default(uuid())
-  amount      Float   @map("amout")
-  walletId    String
-  operationId String
-  motif       String?
-
-  paiemendStatus  PaiementStatus
-  operationStatus OperationStatus
-  transactionType TransactionType
-
-  meta            Json      @default("{}")
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  isDeleted       Boolean?  @default(false)
-  updatedByUserId String?
-  createdByUserId String?
-
-  createdBy User? @relation("Operation-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("Operation-updatedBy", fields: [updatedByUserId], references: [id])
-
-  operation Operation @relation(fields: [operationId], references: [id])
-  wallet    Wallet    @relation(fields: [walletId], references: [id])
-}
-
-model WalletLiquidation {
-  id                 String          @id @unique @default(uuid())
-  endAt              String
-  amount             Float
-  status             OperationStatus
-  startAt            String
-  agentId            String
-  walletId           String
-  validatedByAgentId String?
-
-  meta            Json      @default("{}")
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  isDeleted       Boolean?  @default(false)
-  updatedByUserId String?
-  createdByUserId String?
-
-  createdBy User? @relation("WalletLiquidation-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("WalletLiquidation-updatedBy", fields: [updatedByUserId], references: [id])
-
-  agent            Agent  @relation("AgentId-agent", fields: [agentId], references: [id])
-  validatedByAgent Agent? @relation("validatedByAgentId-agent", fields: [validatedByAgentId], references: [id])
-  wallet           Wallet @relation(fields: [walletId], references: [id])
-}
-
-model ActivitySector {
-  id          String @id @unique @default(uuid())
-  name        String @unique
-  description String
-
-  meta            Json      @default("{}")
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  isDeleted       Boolean?  @default(false)
-  updatedByUserId String?
-  createdByUserId String?
-
-  createdBy User? @relation("ActivitySector-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("ActivitySector-updatedBy", fields: [updatedByUserId], references: [id])
-
-  recipes Recipe[]
-
-  @@map("rfActivitySectors")
-}
-
-model BusStop {
-  id       String @id @unique @default(uuid())
-  name     String @unique
-  entityId String
-
-  meta            Json      @default("{}")
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  isDeleted       Boolean?  @default(false)
-  updatedByUserId String?
-  createdByUserId String?
-
-  createdBy User? @relation("BusStop-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("BusStop-updatedBy", fields: [updatedByUserId], references: [id])
-
-  entity        Entity?        @relation(fields: [entityId], references: [id])
-  agentBusStops AgentBusStop[]
-  operations    Operation[]
-}
-
-model AgentBusStop {
-  id        String @id @unique @default(uuid())
-  agentId   String
-  busStopId String
-
-  meta            Json      @default("{}")
-  createdAt       DateTime? @default(now())
-  updatedAt       DateTime? @updatedAt
-  isDeleted       Boolean?  @default(false)
-  updatedByUserId String?
-  createdByUserId String?
-
-  createdBy User? @relation("AgentBusStop-createdBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("AgentBusStop-updatedBy", fields: [updatedByUserId], references: [id])
-
-  agent   Agent   @relation(fields: [agentId], references: [id])
-  busStop BusStop @relation(fields: [busStopId], references: [id])
 }

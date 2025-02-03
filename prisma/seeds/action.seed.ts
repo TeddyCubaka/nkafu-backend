@@ -1,31 +1,17 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const endponts = {
   core: [
-    'action',
-    'user',
-    'userDevice',
-    'organization',
-    'role',
-    'roleAction',
-    'userPrivilege',
-    'menu',
-    'menuAction',
-    'entity',
-    'agent',
-    'currency',
-    'wallet',
-    'recipe',
-    'taxPayerType',
-    'taxPayer',
-    'possession',
-    'operation',
-    'transaction',
-    'walletLiquidation',
-    'activitySector',
-    'busStop',
-    'agentBusStop'
+'user',
+'userDevice',
+'organization',
+'action',
+'role',
+'roleAction',
+'userPrivilege',
+'menu',
+'menuAction',
   ],
 };
 

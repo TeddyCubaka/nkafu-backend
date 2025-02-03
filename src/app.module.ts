@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { CoreModule } from './core/core.module';
-import { MobileModule } from './mobile/mobile.module';
 
 @Module({
   imports: [
@@ -14,7 +13,6 @@ import { MobileModule } from './mobile/mobile.module';
     }),
     AuthModule,
     CoreModule,
-    MobileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

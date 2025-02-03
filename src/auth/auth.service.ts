@@ -139,12 +139,12 @@ export class AuthService {
           userDevices: {
             where: { deviceInnerId: userDevice.deviceInnerId, isActive: true },
           },
-          agent: {
-            include: {
-              wallets: { include: { currency: true } },
-              organization: true,
-            },
-          },
+          // agent: {
+          //   include: {
+          //     wallets: { include: { currency: true } },
+          //     organization: true,
+          //   },
+          // },
           role: true,
         },
       });

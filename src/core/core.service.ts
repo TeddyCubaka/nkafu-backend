@@ -185,73 +185,6 @@ export class CoreService {
           role: {
             select: { id: true, name: true },
           },
-          agent: {
-            select: {
-              _count: {
-                select: {
-                  operationInitializated: {
-                    where: { status: 'CLOSED' },
-                  },
-                  operationClosed: {
-                    where: { status: 'CLOSED' },
-                  },
-                  agentBusStops: true,
-                  liquidations: {
-                    where: { status: 'CLOSED' },
-                  },
-                  validatedLiquidations: {
-                    where: { status: 'CLOSED' },
-                  },
-                },
-              },
-              wallets: {
-                select: {
-                  id: true,
-                  solde: true,
-                  canBeNegative: true,
-                  currency: {
-                    select: {
-                      id: true,
-                      symbol: true,
-                    },
-                  },
-                },
-              },
-              organization: {
-                select: {
-                  _count: {
-                    select: {
-                      operations: {
-                        where: { status: 'CLOSED' },
-                      },
-                      agents: true,
-                    },
-                  },
-                  wallet: {
-                    select: {
-                      currency: { select: { formatKey: true } },
-                      solde: true,
-                    },
-                  },
-                  agents: {
-                    select: {
-                      _count: {
-                        select: {
-                          operationClosed: {
-                            where: { status: 'CLOSED', action: 'TAXATION' },
-                          },
-                          liquidations: true,
-                        },
-                      },
-                      liquidations: {
-                        where: { status: 'CLOSED' },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
         },
       });
 
@@ -262,51 +195,6 @@ export class CoreService {
         };
       }
 
-      let organisationOperations = 0;
-      let organisationLiquidations = 0;
-      let moneyEntry = 0;
-
-      if (user.agent?.organization?.agents) {
-        user.agent.organization.agents.forEach((agent) => {
-          organisationOperations += agent._count?.operationClosed || 0;
-          organisationLiquidations += agent._count?.liquidations || 0;
-          moneyEntry += agent.liquidations
-            .map((liquidation) => liquidation.amount)
-            .reduce((accumulator, currentValue) => {
-              return accumulator + currentValue;
-            }, 0);
-        });
-      }
-
-      const data: any = {
-        ...user,
-        agent: user.agent
-          ? {
-              ...user.agent,
-              organization: user.agent.organization
-                ? {
-                    wallet: user.agent.organization.wallet,
-                    monthlyEntry: moneyEntry,
-                    _count: {
-                      ...user.agent.organization._count,
-                      taxations: organisationOperations,
-                      liquidations: organisationLiquidations,
-                    },
-                  }
-                : undefined,
-            }
-          : undefined,
-      };
-
-      if (!user.isStaff && data.agent?.organization) {
-        delete data.agent.organization;
-      }
-
-      return {
-        code: 200,
-        message: 'Statistiques chargées avec succès.',
-        data,
-      };
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques :', error);
       return {

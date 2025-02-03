@@ -96,12 +96,7 @@ export class OTPManager {
           userDevices: {
             where: { deviceInnerId: userDevice.deviceInnerId, isActive: true },
           },
-          agent: {
-            include: {
-              wallets: { include: { currency: true } },
-              organization: true,
-            },
-          },
+          // u can add here extra data to return on connection
           role: true,
         },
       });
@@ -118,9 +113,3 @@ export class OTPManager {
     };
   }
 }
-
-// Exemple d'utilisation:
-// const db = new Database();
-// const cache = await import('cache-manager').then(cacheManager => cacheManager.caching({ store: 'memory', ttl: 300 }));
-// const otpManager = new OTPManager(db, cache);
-// otpManager.generateAndSendOTP('userId', 'SMS');
