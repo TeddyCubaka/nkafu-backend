@@ -37,7 +37,8 @@ model User {
   mustRenewPassword   Boolean @default(true)
   allowedDeviceNumber Int     @default(1)
 
-  roleId String?
+  roleId         String?
+  organizationId String?
 
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt
@@ -46,7 +47,8 @@ model User {
   isDeleted       Boolean?  @default(false)
   meta            Json      @default("{}")
 
-  role Role? @relation("user-role", references: [id], fields: [roleId])
+  role         Role?         @relation("user-role", references: [id], fields: [roleId])
+  organization Organization? @relation("user-organization", references: [id], fields: [organizationId])
 
   userPrivileges UserPrivilege[] @relation("User-Privilege")
   userDevices    UserDevice[]
@@ -106,8 +108,9 @@ model Organization {
   isDeleted       Boolean?  @default(false)
   meta            Json      @default("{}")
 
-  createdBy User? @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
-  updatedBy User? @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
+  createdBy User?  @relation("OrganizationCreatedBy", fields: [createdByUserId], references: [id])
+  updatedBy User?  @relation("OrganizationupdatedBy", fields: [updatedByUserId], references: [id])
+  User      User[] @relation("user-organization")
 }
 
 model Action {
