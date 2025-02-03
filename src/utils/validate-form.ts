@@ -61,6 +61,9 @@ export class DataFormatter {
             create: this.handleChildren(value, inputType, property),
           };
           break;
+        case 'file':
+          formattedData[property] = this.convertToString(value, property);
+          break;
         default:
           throw new Error(`Type non supporté pour la clé "${property}".`);
       }

@@ -9,9 +9,12 @@ import {
   Query,
   Req,
   Res,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CoreService } from './core.service';
+import { Multer } from 'multer';
 import { Request, Response } from 'express';
 import { coreConfig as config } from './models/core.model';
 import { QueriesUtils } from 'src/utils/query-to-prisma-params';
@@ -21,6 +24,9 @@ import {
   // validateForm
 } from 'src/utils/validate-form';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import saveImage from 'src/utils/saveImage';
+import { join } from 'path';
 
 @Controller('')
 export class CoreController {
@@ -100,12 +106,14 @@ export class CoreController {
 
   @Post('create/core/:model')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('file'))
   async create(
     @Param('model') model: string,
     @Res() res: Response,
     @Req() req: Request,
     @Query() query: { [key: string]: any },
     @Body() body: Record<string, any>,
+    @UploadedFiles() files: Array<Multer.File>,
   ) {
     try {
       const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
@@ -116,11 +124,24 @@ export class CoreController {
           message: 'ressource non trouvé dans le système',
         });
       }
+      let reqData = body;
+      if (files.length > 0 && 'json' in body) {
+        reqData = JSON.parse(body.json);
+        files.forEach((file) => {
+          const fileNameParts = file.originalname.split('_');
+          const originalFieldName = fileNameParts[0];
+          const url = saveImage('upload/test', file);
+          reqData[originalFieldName] = url;
+        });
+      }
       const queriesUtils = new QueriesUtils();
       const _queries = queriesUtils.toPrismaFilterMap(query);
       const _model = new config[modelName]();
       const dataFormatter = new DataFormatter(req.user['userId']);
-      const validatedData = dataFormatter.formatData(body, _model.createForm);
+      const validatedData = dataFormatter.formatData(
+        reqData,
+        _model.createForm,
+      );
 
       const data = await _model
         .create(
@@ -148,6 +169,7 @@ export class CoreController {
         ...data,
       });
     } catch (error) {
+      console.error(error);
       return res.status(400).json({
         code: 400,
         message: error.message || "une erreur s'est produite",
@@ -158,6 +180,7 @@ export class CoreController {
 
   @Patch('change/core/:model/:uuid')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('file'))
   async update(
     @Param('model') model: string,
     @Param('uuid') uuid: string,
@@ -165,6 +188,7 @@ export class CoreController {
     @Query() query: { [key: string]: any },
     @Body() body: Record<string, any>,
     @Req() req: Request,
+    @UploadedFiles() files: Array<Multer.File>,
   ) {
     try {
       const modelName = `${model[0].toUpperCase()}${model.slice(1)}`;
@@ -175,22 +199,27 @@ export class CoreController {
           message: 'ressource non trouvé dans le système',
         });
       }
+
+      let reqData = body;
+
+      if (files && files.length > 0 && 'json' in body) {
+        reqData = JSON.parse(body.json);
+        files.forEach((file) => {
+          const fileNameParts = file.originalname.split('_');
+          const originalFieldName = fileNameParts[0];
+          const url = saveImage('upload/test', file);
+          reqData[originalFieldName] = url;
+        });
+      }
+
       const queriesUtils = new QueriesUtils();
       const _queries = queriesUtils.toPrismaFilterMap(query);
       const _model = new config[modelName]();
       const dataFormatter = new DataFormatter(req.user['userId']);
       const validatedData = dataFormatter.formatData(
-        body,
+        reqData,
         _model.updateForm,
       );
-
-      // if (validationStatus !== true) {
-      //   return res.status(200).json({
-      //     code: 400,
-      //     message: 'la validation a echoue',
-      //     validationStatus,
-      //   });
-      // }
 
       const data = await _model
         .updateById(
@@ -367,5 +396,17 @@ export class CoreController {
   async userStats(@Req() request: Request, @Res() res: Response) {
     const data = await this.coreService.loadStats(request.user['userId']);
     return res.status(data.code).json(data);
+  }
+
+  // @Get('image/*')
+  // getImage(@Param(0) imagePath: string, @Res() res: Response) {
+  //   return res.sendFile(join(__dirname, '..', '../../public', imageName));
+  // }
+
+  @Get('image/*imagePath') // Capture tout ce qui vient après /image/
+  getImage(@Param('imagePath') imagePath: string[], @Res() res: Response) {
+    console.log(imagePath);
+    const filePath = join(__dirname, '..', '../../public', imagePath.join('/'));
+    return res.sendFile(filePath);
   }
 }
