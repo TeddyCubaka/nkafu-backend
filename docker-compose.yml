@@ -1,44 +1,108 @@
+# version: '3'
+# services:
+#   app:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: nkafu-app
+#     working_dir: /app
+#     # Copie le script start.sh dans le conteneur au démarrage
+#     command: ["yarn", "start"]
+#     ports:
+#       - "4000:4000"
+#     # depends_on:
+#     #   - db
+#     env_file:
+#       - .env.prod
+#     restart: always
+
+#   # db:
+#   #   image: postgres:13
+#   #   container_name: nkafu-db
+#   #   env_file:
+#   #     - .env.prod
+#   #   ports:
+#   #     - "5433:5432"
+#   #   volumes:
+#   #     - postgres_data:/var/lib/postgresql/data
+#   #   restart: always
+
+#   # pgadmin:
+#   #   image: dpage/pgadmin4
+#   #   container_name: nkafu-pgadmin
+#   #   env_file:
+#   #     - .env.prod
+#   #   ports:
+#   #     - "5051:80"
+#   #   depends_on:
+#   #     - db
+#   #   restart: always
+
+# volumes:
+#   # postgres_data:
+#   app_images:
+#     driver: local
+
+version: '3.8'
+
 services:
+  # Service pour l'application NestJS
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nkafu-app
-    working_dir: /usr/src/app
-    volumes:
-      - .:/usr/src/app
-    command: yarn start
+    # working_dir: /app
+    container_name: nkafu_app
     ports:
       - "4000:4000"
+    env_file:
+      - .env.prod
     depends_on:
-      - db
-    env_file:
-      - .env.prod
-    restart: always
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: unless-stopped
 
+  # Service pour PostgreSQL
   db:
-    image: postgres:13
-    container_name: nkafu-db
+    image: postgres:15
+    container_name: nkafu_db
     env_file:
       - .env.prod
-    ports:
-      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: always
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  # Service pour pgAdmin
   pgadmin:
     image: dpage/pgadmin4
-    container_name: nkafu-pgadmin
+    container_name: nakfu_pgadmin
     env_file:
       - .env.prod
     ports:
       - "5051:80"
     depends_on:
       - db
-    restart: always
+    networks:
+      - app-network
 
+# Volumes pour persister les données
 volumes:
   postgres_data:
-  app_images:
-    driver: local
+
+    # Réseau pour connecter les services
+networks:
+  app-network:
+    driver: bridge
