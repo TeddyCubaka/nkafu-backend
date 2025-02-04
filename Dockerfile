@@ -11,7 +11,7 @@ RUN yarn global add @nestjs/cli ts-node
 
 RUN yarn cache clean
 
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
